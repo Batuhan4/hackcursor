@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 import shutil
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -30,15 +31,53 @@ FACE_MODEL_REVISION = "52fa54977207fa4f021de949b515fb19dcab4488"
 PLATE_MODEL_ID = "Koushim/yolov8-license-plate-detection"
 PLATE_MODEL_REVISION = "9aaa5cd490abe0c165882ba87f4f62658ab54d01"
 
+DEFAULT_SETTINGS = ("urban", "suburban")
+DEFAULT_TIME_OF_DAY = ("day",)
+INFRASTRUCTURE_COMFORT = {
+    "well-maintained": "high_comfort_proxy",
+    "moderate": "medium_comfort_proxy",
+    "poor": "low_comfort_proxy",
+    "minimal": "low_comfort_proxy",
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--count", type=int, default=12)
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=0,
+        help="Total samples when --balanced-per-class is not set",
+    )
+    parser.add_argument(
+        "--balanced-per-class",
+        type=int,
+        default=150,
+        help="Collect this many urban and suburban samples each (default 150+150=300)",
+    )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--face-threshold", type=float, default=0.15)
     parser.add_argument("--plate-threshold", type=float, default=0.15)
+    parser.add_argument(
+        "--setting",
+        nargs="+",
+        default=list(DEFAULT_SETTINGS),
+        choices=["urban", "suburban", "rural", "highway"],
+    )
+    parser.add_argument(
+        "--time-of-day",
+        nargs="+",
+        default=list(DEFAULT_TIME_OF_DAY),
+        choices=["day", "dusk", "dawn", "night"],
+    )
+    parser.add_argument(
+        "--stream-buffer",
+        type=int,
+        default=2000,
+        help="Shuffle buffer for streaming dataset selection",
+    )
     return parser.parse_args()
 
 
@@ -86,7 +125,16 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def safe_record(example: dict[str, Any], filename: str, faces: int, plates: int, digest: str) -> dict[str, Any]:
+def comfort_proxy(infrastructure: str | None) -> str | None:
+    if infrastructure is None:
+        return None
+    return INFRASTRUCTURE_COMFORT.get(infrastructure)
+
+
+def safe_record(
+    example: dict[str, Any], filename: str, faces: int, plates: int, digest: str
+) -> dict[str, Any]:
+    infrastructure = example.get("infrastructure")
     return {
         "source_id": str(example["id"]),
         "region": example.get("region"),
@@ -94,6 +142,8 @@ def safe_record(example: dict[str, Any], filename: str, faces: int, plates: int,
         "weather": example.get("weather"),
         "time_of_day": example.get("time_of_day"),
         "road_type": example.get("road_type"),
+        "infrastructure": infrastructure,
+        "infrastructure_comfort_proxy": comfort_proxy(infrastructure),
         "latitude": example.get("latitude"),
         "longitude": example.get("longitude"),
         "captured_at": example.get("captured_at"),
@@ -105,10 +155,50 @@ def safe_record(example: dict[str, Any], filename: str, faces: int, plates: int,
     }
 
 
+def target_count(args: argparse.Namespace) -> tuple[int, dict[str, int] | None]:
+    if args.balanced_per_class > 0:
+        per_class = {
+            setting: args.balanced_per_class
+            for setting in args.setting
+            if setting in {"urban", "suburban"}
+        }
+        if len(per_class) < 2:
+            raise SystemExit(
+                "balanced sampling requires at least urban and suburban in --setting"
+            )
+        return sum(per_class.values()), per_class
+    if args.count < 1:
+        raise SystemExit("set --count or --balanced-per-class")
+    return args.count, None
+
+
+def matches_filters(example: dict[str, Any], args: argparse.Namespace) -> bool:
+    setting = example.get("setting")
+    if setting not in args.setting:
+        return False
+    if example.get("time_of_day") not in args.time_of_day:
+        return False
+    return True
+
+
+def should_take(
+    example: dict[str, Any],
+    per_class_targets: dict[str, int] | None,
+    per_class_counts: Counter[str],
+    total_target: int,
+    total_count: int,
+) -> bool:
+    setting = example.get("setting")
+    if per_class_targets is not None:
+        if setting not in per_class_targets:
+            return False
+        return per_class_counts[setting] < per_class_targets[setting]
+    return total_count < total_target
+
+
 def main() -> int:
     args = parse_args()
-    if args.count < 1:
-        raise SystemExit("--count must be positive")
+    total_target, per_class_targets = target_count(args)
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
     args.manifest.parent.mkdir(parents=True, exist_ok=True)
@@ -121,15 +211,29 @@ def main() -> int:
         split="train",
         revision=DATASET_REVISION,
         streaming=True,
-    ).shuffle(seed=args.seed, buffer_size=500)
+    ).shuffle(seed=args.seed, buffer_size=args.stream_buffer)
 
     records: list[dict[str, Any]] = []
+    per_class_counts: Counter[str] = Counter()
     iterator = iter(dataset)
     try:
         for example in iterator:
-            if example.get("setting") not in {"urban", "suburban"}:
+            if not matches_filters(example, args):
                 continue
-            if example.get("time_of_day") != "day":
+            if not should_take(
+                example,
+                per_class_targets,
+                per_class_counts,
+                total_target,
+                len(records),
+            ):
+                if per_class_targets is not None and all(
+                    per_class_counts[label] >= target
+                    for label, target in per_class_targets.items()
+                ):
+                    break
+                if per_class_targets is None and len(records) >= total_target:
+                    break
                 continue
 
             rgb = np.asarray(example["image"].convert("RGB"))
@@ -144,7 +248,10 @@ def main() -> int:
             if not cv2.imwrite(str(output), anonymized, [cv2.IMWRITE_JPEG_QUALITY, 90]):
                 raise RuntimeError(f"failed to write anonymized image: {output}")
             records.append(safe_record(example, filename, faces, plates, sha256(output)))
-            if len(records) >= args.count:
+            setting = example.get("setting")
+            if isinstance(setting, str):
+                per_class_counts[setting] += 1
+            if len(records) >= total_target:
                 break
     except Exception:
         shutil.rmtree(args.output_dir, ignore_errors=True)
@@ -157,8 +264,11 @@ def main() -> int:
         del dataset
         gc.collect()
 
-    if len(records) != args.count:
-        raise RuntimeError(f"requested {args.count} samples, prepared {len(records)}")
+    if len(records) != total_target:
+        raise RuntimeError(
+            f"requested {total_target} samples, prepared {len(records)}; "
+            f"class counts={dict(per_class_counts)}"
+        )
 
     manifest = {
         "dataset": {
@@ -167,9 +277,18 @@ def main() -> int:
             "license": DATASET_LICENSE,
             "source": "Mapillary contributors via Hugging Face",
             "selection": {
-                "setting": ["urban", "suburban"],
-                "time_of_day": ["day"],
+                "setting": list(args.setting),
+                "time_of_day": list(args.time_of_day),
                 "seed": args.seed,
+                "balanced_per_class": per_class_targets,
+                "total_target": total_target,
+                "weak_label_fields": [
+                    "setting",
+                    "infrastructure",
+                    "weather",
+                    "time_of_day",
+                    "infrastructure_comfort_proxy",
+                ],
             },
         },
         "anonymization": {
@@ -204,6 +323,7 @@ def main() -> int:
         f"{manifest['anonymization']['faces_masked']} faces and "
         f"{manifest['anonymization']['plates_masked']} plates masked"
     )
+    print(f"[prepare] class counts: {dict(per_class_counts)}")
     print(f"[prepare] manifest: {args.manifest}")
     return 0
 

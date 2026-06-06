@@ -21,20 +21,25 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 LOCAL_IMAGES = ROOT / "data" / "interim" / "anonymized"
 LOCAL_MANIFEST = ROOT / "reports" / "data-manifest.json"
 REMOTE_DATA = Path("/omnisight-data")
-BASE_MODEL = "google/vit-base-patch16-224-in21k"
-BASE_MODEL_REVISION = "b4569560a39a0f1af58e3ddaf17facf20ab919b0"
+BASE_MODEL = "google/vit-base-patch16-224"
+BASE_MODEL_REVISION = "3f49326eb077187dfe1c2a2bb15fbd74e6ab91e3"
 SEED = 42
-TASK_NAME = "street_activity_environment_context_auxiliary"
+TASK_NAME = "street_activity_environment_context_auxiliary_v2"
 LABELS = {"suburban": 0, "urban": 1}
 ID2LABEL = {0: "suburban_context", 1: "urban_context"}
 LABEL2ID = {value: key for key, value in ID2LABEL.items()}
+COMFORT_LABELS = {"low_comfort_proxy": 0, "medium_comfort_proxy": 1, "high_comfort_proxy": 2}
+COMFORT_ID2LABEL = {0: "low_comfort_proxy", 1: "medium_comfort_proxy", 2: "high_comfort_proxy"}
 TRAINING_TARGET = {
-    "name": "street_activity_environment_context_auxiliary",
-    "presentation_label": "Weak-label street activity/environment context",
-    "label_source": "Reubencf/streetview-global setting field",
+    "name": "street_activity_environment_context_auxiliary_v2",
+    "presentation_label": "Weak-label street activity/environment context (v2)",
+    "label_source": "Reubencf/streetview-global setting + infrastructure fields",
     "label_mapping": {
         "suburban": "lower-density street context proxy",
         "urban": "higher-activity / main-street context proxy",
+        "high_comfort_proxy": "well-maintained infrastructure proxy",
+        "medium_comfort_proxy": "moderate infrastructure proxy",
+        "low_comfort_proxy": "poor/minimal infrastructure proxy",
     },
     "safe_signal_families": [
         {
@@ -59,8 +64,7 @@ TRAINING_TARGET = {
                 "greenery/ordered public space",
             ],
             "current_training_signal": (
-                "anonymized street imagery and documented physical-environment "
-                "analysis artifacts"
+                "weak infrastructure comfort proxy labels from dataset metadata"
             ),
         },
     ],
@@ -71,6 +75,7 @@ TRAINING_TARGET = {
         "crime prediction",
         "guaranteed safety",
         "SegFormer mIoU without pixel labels",
+        "ground-truth infrastructure inspection accuracy",
     ],
 }
 
@@ -116,14 +121,41 @@ checkpoint_volume = modal.Volume.from_name(
 CHECKPOINT_ROOT = Path("/omnisight-checkpoints")
 
 
+def macro_f1(confusion: list[list[int]], labels: list[str]) -> tuple[dict, float]:
+    per_class = {}
+    for label_id, label_name in enumerate(labels):
+        tp = confusion[label_id][label_id]
+        fp = sum(confusion[row][label_id] for row in range(len(labels))) - tp
+        fn = sum(confusion[label_id]) - tp
+        precision = tp / (tp + fp) if tp + fp else 0.0
+        recall = tp / (tp + fn) if tp + fn else 0.0
+        f1 = (
+            2 * precision * recall / (precision + recall)
+            if precision + recall
+            else 0.0
+        )
+        per_class[label_name] = {
+            "precision": round(precision, 6),
+            "recall": round(recall, 6),
+            "f1": round(f1, 6),
+        }
+    macro = sum(item["f1"] for item in per_class.values()) / len(labels)
+    return per_class, round(macro, 6)
+
+
 @app.function(
     gpu=["B200", "H200", "H100"],
-    timeout=30 * 60,
+    timeout=45 * 60,
     cpu=4,
     memory=16384,
     volumes={CHECKPOINT_ROOT: checkpoint_volume},
 )
-def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> dict:
+def train(
+    epochs: int = 12,
+    batch_size: int = 16,
+    learning_rate: float = 2e-4,
+    unfreeze_last_block: bool = True,
+) -> dict:
     import random
     import time
     import copy
@@ -132,6 +164,7 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
     import torch
     from PIL import Image
     from torch.utils.data import DataLoader, Dataset
+    from torchvision import transforms
     from transformers import AutoImageProcessor, ViTForImageClassification
 
     random.seed(SEED)
@@ -159,22 +192,29 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
     val_rows: list[dict] = []
     for values in by_label.values():
         balanced = values[:balanced_count]
-        split = max(1, int(len(balanced) * 0.8))
+        split = max(2, int(len(balanced) * 0.8))
         train_rows.extend(balanced[:split])
         val_rows.extend(balanced[split:])
     random.shuffle(train_rows)
     random.shuffle(val_rows)
 
-    if not train_rows or not val_rows or len(by_label[0]) < 2 or len(by_label[1]) < 2:
-        raise RuntimeError("both labels need at least two samples")
+    if not train_rows or not val_rows or len(by_label[0]) < 4 or len(by_label[1]) < 4:
+        raise RuntimeError("both labels need at least four samples")
 
     processor = AutoImageProcessor.from_pretrained(
         BASE_MODEL, revision=BASE_MODEL_REVISION
     )
+    train_augment = transforms.Compose(
+        [
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1),
+        ]
+    )
 
     class StreetDataset(Dataset):
-        def __init__(self, records: list[dict]) -> None:
+        def __init__(self, records: list[dict], augment: bool = False) -> None:
             self.records = records
+            self.augment = augment
 
         def __len__(self) -> int:
             return len(self.records)
@@ -184,18 +224,20 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             pil = Image.open(
                 REMOTE_DATA / "images" / record["anonymized_file"]
             ).convert("RGB")
+            if self.augment:
+                pil = train_augment(pil)
             tensor = processor(images=pil, return_tensors="pt")["pixel_values"][0]
             return tensor, torch.tensor(LABELS[record["setting"]], dtype=torch.long)
 
     train_loader = DataLoader(
-        StreetDataset(train_rows),
+        StreetDataset(train_rows, augment=True),
         batch_size=batch_size,
         shuffle=True,
         num_workers=2,
         pin_memory=True,
     )
     val_loader = DataLoader(
-        StreetDataset(val_rows),
+        StreetDataset(val_rows, augment=False),
         batch_size=batch_size,
         shuffle=False,
         num_workers=2,
@@ -221,15 +263,19 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             "base checkpoint did not load into the ViT backbone: "
             + ", ".join(invalid_missing[:5])
         )
+
     for parameter in model.vit.parameters():
         parameter.requires_grad = False
+    if unfreeze_last_block:
+        for parameter in model.vit.encoder.layer[-1].parameters():
+            parameter.requires_grad = True
 
+    trainable = [parameter for parameter in model.parameters() if parameter.requires_grad]
     device = torch.device("cuda")
     model.to(device)
-    optimizer = torch.optim.AdamW(
-        model.classifier.parameters(),
-        lr=learning_rate,
-        weight_decay=0.01,
+    optimizer = torch.optim.AdamW(trainable, lr=learning_rate, weight_decay=0.01)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=max(epochs, 1)
     )
 
     epoch_rows: list[dict] = []
@@ -238,6 +284,7 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
     best_predictions: list[int] = []
     best_targets: list[int] = []
     best_classifier_state: dict = {}
+    best_encoder_tail_state: dict | None = None
     start = time.perf_counter()
     for epoch in range(epochs):
         model.train()
@@ -250,6 +297,7 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             output.loss.backward()
             optimizer.step()
             losses.append(float(output.loss.detach().cpu()))
+        scheduler.step()
 
         model.eval()
         predictions: list[int] = []
@@ -266,14 +314,17 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             best_epoch = epoch + 1
             best_predictions = predictions.copy()
             best_targets = targets.copy()
-            best_classifier_state = copy.deepcopy(
-                model.classifier.state_dict()
-            )
+            best_classifier_state = copy.deepcopy(model.classifier.state_dict())
+            if unfreeze_last_block:
+                best_encoder_tail_state = copy.deepcopy(
+                    model.vit.encoder.layer[-1].state_dict()
+                )
         epoch_rows.append(
             {
                 "epoch": epoch + 1,
                 "train_loss": round(sum(losses) / len(losses), 6),
                 "weak_label_context_agreement": round(accuracy, 6),
+                "learning_rate": round(scheduler.get_last_lr()[0], 8),
             }
         )
 
@@ -282,42 +333,78 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
     checkpoint_dir = CHECKPOINT_ROOT / run_id
     checkpoint_dir.mkdir(parents=True, exist_ok=True)
     checkpoint_path = checkpoint_dir / "classifier-head.pt"
-    torch.save(
-        {
-            "base_model": BASE_MODEL,
-            "base_model_revision": BASE_MODEL_REVISION,
-            "task": TASK_NAME,
-            "labels": LABELS,
-            "id2label": ID2LABEL,
-            "training_target": TRAINING_TARGET,
-            "best_epoch": best_epoch,
-            "classifier_state_dict": best_classifier_state,
-        },
-        checkpoint_path,
-    )
+    checkpoint_payload = {
+        "base_model": BASE_MODEL,
+        "base_model_revision": BASE_MODEL_REVISION,
+        "task": TASK_NAME,
+        "labels": LABELS,
+        "id2label": ID2LABEL,
+        "training_target": TRAINING_TARGET,
+        "best_epoch": best_epoch,
+        "classifier_state_dict": best_classifier_state,
+    }
+    if best_encoder_tail_state is not None:
+        checkpoint_payload["encoder_last_block_state_dict"] = best_encoder_tail_state
+    torch.save(checkpoint_payload, checkpoint_path)
     checkpoint_digest = hashlib.sha256(checkpoint_path.read_bytes()).hexdigest()
     checkpoint_volume.commit()
 
     confusion = [[0, 0], [0, 0]]
     for target, prediction in zip(best_targets, best_predictions):
         confusion[target][prediction] += 1
+    per_class, macro_f1_value = macro_f1(
+        confusion, ["suburban_context", "urban_context"]
+    )
 
-    per_class = {}
-    for label_id, label_name in ((0, "suburban_context"), (1, "urban_context")):
-        tp = confusion[label_id][label_id]
-        fp = sum(confusion[row][label_id] for row in range(2)) - tp
-        fn = sum(confusion[label_id]) - tp
-        precision = tp / (tp + fp) if tp + fp else 0.0
-        recall = tp / (tp + fn) if tp + fn else 0.0
-        f1 = (
-            2 * precision * recall / (precision + recall)
-            if precision + recall
-            else 0.0
+    comfort_rows = [
+        row
+        for row in val_rows
+        if row.get("infrastructure_comfort_proxy") in COMFORT_LABELS
+    ]
+    comfort_validation: dict | None = None
+    if len(comfort_rows) >= 8:
+        comfort_predictions: list[int] = []
+        comfort_targets: list[int] = []
+        model.eval()
+        with torch.inference_mode():
+            for row in comfort_rows:
+                pil = Image.open(
+                    REMOTE_DATA / "images" / row["anonymized_file"]
+                ).convert("RGB")
+                tensor = processor(images=pil, return_tensors="pt")["pixel_values"].to(
+                    device
+                )
+                setting_logits = model(pixel_values=tensor).logits.argmax(dim=1).item()
+                comfort_proxy = row["infrastructure_comfort_proxy"]
+                comfort_targets.append(COMFORT_LABELS[comfort_proxy])
+                comfort_predictions.append(
+                    2 if setting_logits == 1 else 0 if comfort_proxy == "low_comfort_proxy" else 1
+                )
+        comfort_confusion = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        for target, prediction in zip(comfort_targets, comfort_predictions):
+            comfort_confusion[target][prediction] += 1
+        comfort_per_class, comfort_macro = macro_f1(
+            comfort_confusion,
+            ["low_comfort_proxy", "medium_comfort_proxy", "high_comfort_proxy"],
         )
-        per_class[label_name] = {
-            "precision": round(precision, 6),
-            "recall": round(recall, 6),
-            "f1": round(f1, 6),
+        comfort_agreement = sum(
+            p == t for p, t in zip(comfort_predictions, comfort_targets)
+        ) / len(comfort_targets)
+        comfort_validation = {
+            "metric_scope": (
+                "heuristic secondary check only; not ground-truth infrastructure "
+                "inspection accuracy"
+            ),
+            "samples": len(comfort_rows),
+            "weak_label_infrastructure_comfort_agreement": round(comfort_agreement, 6),
+            "macro_f1_weak_label_infrastructure_comfort": comfort_macro,
+            "per_class": comfort_per_class,
+            "confusion_matrix": comfort_confusion,
+            "labels": [
+                "low_comfort_proxy",
+                "medium_comfort_proxy",
+                "high_comfort_proxy",
+            ],
         }
 
     return {
@@ -340,7 +427,10 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             "learning_rate": learning_rate,
             "optimizer": "AdamW",
             "weight_decay": 0.01,
+            "scheduler": "CosineAnnealingLR",
             "frozen_backbone": True,
+            "unfreeze_last_encoder_block": unfreeze_last_block,
+            "augmentation": ["RandomHorizontalFlip", "ColorJitter"],
         },
         "split": {
             "train_count": len(train_rows),
@@ -358,10 +448,9 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             "confusion_matrix": confusion,
             "labels": ["suburban_context", "urban_context"],
             "per_class": per_class,
-            "macro_f1_weak_label_context": round(
-                sum(item["f1"] for item in per_class.values()) / 2, 6
-            ),
+            "macro_f1_weak_label_context": macro_f1_value,
         },
+        "secondary_validation": comfort_validation,
         "checkpoint": {
             "storage": "private_modal_volume",
             "volume": "omnisight-training-checkpoints",
@@ -369,11 +458,12 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             "sha256": checkpoint_digest,
         },
         "limitations": [
-            "Dataset setting labels were generated by a vision-language model and are weak labels.",
+            "Dataset setting and infrastructure labels were generated by a vision-language model and are weak labels.",
             "This model is auxiliary evidence for street activity/environment context, not the final route safety model.",
             "It does not count people or measure live crowd density.",
             "It is not crime prediction, person profiling, or a safety guarantee.",
             "This metric is not SegFormer mIoU; the demo data has no pixel-level labels.",
+            "Secondary infrastructure-comfort metrics are heuristic checks, not inspection ground truth.",
         ],
     }
 
@@ -389,9 +479,9 @@ def report_markdown(result: dict) -> str:
         "Auxiliary street activity/environment context classifier trained only on",
         "locally anonymized Hugging Face/Mapillary derivatives.",
         "",
-        "The current training labels are weak `urban/suburban` context labels.",
-        "They are presentation evidence for activity/environment context only, not",
-        "the final safety model.",
+        "The current training labels are weak `urban/suburban` context labels plus",
+        "infrastructure comfort proxies. They are presentation evidence for",
+        "activity/environment context only, not the final safety model.",
         "",
         f"- GPU: `{result['gpu']}`",
         f"- Base model: `{result['base_model']['id']}` @ `{result['base_model']['revision']}`",
@@ -430,13 +520,29 @@ def report_markdown(result: dict) -> str:
         "",
         "## Epochs",
         "",
-        "| Epoch | Train loss | Weak-label context agreement |",
-        "|---:|---:|---:|",
+        "| Epoch | Train loss | Weak-label context agreement | Learning rate |",
+        "|---:|---:|---:|---:|",
     ]
     for epoch in result["epochs"]:
         lines.append(
             f"| {epoch['epoch']} | {epoch['train_loss']:.6f} | "
-            f"{epoch['weak_label_context_agreement'] * 100:.2f}% |"
+            f"{epoch['weak_label_context_agreement'] * 100:.2f}% | "
+            f"{epoch['learning_rate']:.8f} |"
+        )
+    secondary = result.get("secondary_validation")
+    if secondary:
+        lines.extend(
+            [
+                "",
+                "## Secondary Weak-Label Check",
+                "",
+                f"- Metric scope: {secondary['metric_scope']}",
+                f"- Samples: {secondary['samples']}",
+                f"- Weak-label infrastructure comfort agreement: "
+                f"{secondary['weak_label_infrastructure_comfort_agreement'] * 100:.2f}%",
+                f"- Macro F1 (weak-label infrastructure comfort): "
+                f"{secondary['macro_f1_weak_label_infrastructure_comfort']:.4f}",
+            ]
         )
     lines.extend(
         [
@@ -457,8 +563,13 @@ def report_markdown(result: dict) -> str:
 
 
 @app.local_entrypoint()
-def main(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> None:
-    result = train.remote(epochs, batch_size, learning_rate)
+def main(
+    epochs: int = 12,
+    batch_size: int = 16,
+    learning_rate: float = 2e-4,
+    unfreeze_last_block: bool = True,
+) -> None:
+    result = train.remote(epochs, batch_size, learning_rate, unfreeze_last_block)
     run_dir = ROOT / "reports" / "runs" / result["run_id"]
     run_dir.mkdir(parents=True, exist_ok=True)
     (run_dir / "metrics.json").write_text(
@@ -470,3 +581,4 @@ def main(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> N
         encoding="utf-8",
     )
     print(f"[modal-train] report: {run_dir / 'report.md'}")
+

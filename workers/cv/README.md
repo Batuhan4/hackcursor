@@ -45,7 +45,7 @@ scripts/demo-fixture.sh
 # Prepare open-license Hugging Face / Mapillary samples.
 # Raw images stay in memory; only solid-masked derivatives are written locally.
 set -a; . ./.env; set +a
-.venv/bin/python workers/cv/prepare_hf_demo.py --count 12
+.venv/bin/python workers/cv/prepare_hf_demo.py --balanced-per-class 150
 
 # Run semantic street analysis and generate reports/runs/<run-id>/.
 .venv/bin/python workers/cv/analyze_streets.py --device auto
@@ -56,7 +56,7 @@ python3 workers/cv/preflight_manifest.py
 # Auxiliary measurable activity/environment context run on anonymized derivatives.
 # Uses the fastest available GPU in this order: B200, H200, H100.
 set -a; . ./.env; set +a
-modal run workers/cv/modal_train_scene.py --epochs 5 --batch-size 8
+modal run workers/cv/modal_train_scene.py --epochs 12 --batch-size 16
 ```
 
 Real-imagery mode requires `requirements.txt` installed **and** the
