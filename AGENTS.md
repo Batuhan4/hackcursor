@@ -18,12 +18,22 @@ Oncelikli MVP:
 
 - Web: Next.js
 - Mobil: Expo; organizasyonun verdigi mimari sablona uy.
-- Backend: Go; organizasyonun verdigi mimari sablona kesin uy.
-- Hosting: Web icin Vercel. Backend icin resmi kural Render.com; kullanici/ortam Railway sagliyorsa deployment notlarinda bu farki acikca belgeleyerek kullan.
+- Backend: Go; kesinlikle `masterfabric-go` GitHub reposundaki mimari kullanilir. Kendi Go mimarini kurma.
+- Backend kaynak varsayimi: `https://github.com/gurkanfikretgunak/masterfabric-go`. Organizasyon farkli URL verirse once bu dosyayi guncelle.
+- AI veri seti ve model kaynagi: Hugging Face platformu kullanilir. Lokal model agirliklari sadece demo/gelistirme cache'i olabilir.
+- Hosting: Web icin Vercel. Backend icin Render.com zorunludur.
+- Database: Render Postgres tercih edilir ve Go backend `DATABASE_URL` ile baglanir. Lokal demo icin gecici JSON/SQLite sadece offline fallback olarak kullanilabilir; final deploy'da kaynak gercegi Postgres olmalidir.
 - Harici API: Google Street View API / Google Maps API, ilk 10.000 istek kotasini koruyacak sekilde cache ve rate-limit ile kullan.
 - AI/CV: Hazir model veya servis kullanilabilir; insan kimligi, kisi profilleme, arac/kisi takibi yasaktir.
 
 Yeni dependency ekleme, mimariyi buyutme veya stack disina cikma ancak acik teknik gerekce varsa yapilir ve README'de belgelenir.
+
+## Cursor Ruleset ve AI Dokumantasyonu
+
+- Cursor IDE kullanimi zorunludur.
+- Agentic ruleset repo icinde `.cursor/rules/` altinda tutulur.
+- Cursor CLI veya Cursor SDK kullanilirsa README'de hangi otomasyon icin kullanildigi belgelenir; bu AI Adaptasyonu icin bonus deger tasir.
+- README, kullanilan AI araclarini, prompt tekniklerini, model/servis kararlarini, Hugging Face dataset/model akisini ve bu araclarin gelistirmeyi nasil hizlandirdigini acikca anlatmalidir.
 
 ## Ortam Degiskenleri ve CLI Yetkileri
 
@@ -37,7 +47,7 @@ Beklenen degisken aileleri:
 - `GOOGLE_MAPS_API_KEY` veya `GOOGLE_STREET_VIEW_API_KEY`
 - `VERCEL_TOKEN`
 - `RENDER_API_KEY`
-- `RAILWAY_TOKEN` veya Railway CLI auth bilgisi
+- `HUGGINGFACE_API_KEY` veya `HF_TOKEN`
 - `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` veya kullanilan diger AI servis anahtarlari
 - `GEMINI_API_KEY` veya kullanilan diger Google AI servis anahtarlari
 - `DATABASE_URL`
@@ -71,6 +81,7 @@ Dar zamanda "calisan dikey demo" her zaman genis ama yarim ozelliklerden once ge
 
 - Sik ve anlamli commit at; tek parca final upload kabul edilmez.
 - Her anlamli asama icin commit yap: scaffold, anonymization, detection, API, UI, deploy, docs.
+- Organizasyon/juri sureci commit loglarini inceleyecegi icin her checkpoint GitHub'a pushlanir.
 - Commit mesajlari neden odakli olsun. Ornek: `Protect demo data with anonymization gate`.
 - `.env`, ham veri, yuz/plaka iceren gorseller, buyuk model agirliklari ve local runtime dosyalari commit edilmez.
 - User tarafindan yapilmis degisiklikleri geri alma. Gerekirse ustune uyumlu calis.
@@ -79,6 +90,7 @@ Dar zamanda "calisan dikey demo" her zaman genis ama yarim ozelliklerden once ge
 
 - Once mevcut dosya ve mimariyi oku, sonra en kucuk dogru degisikligi yap.
 - Next.js, Expo ve Go katmanlarini temiz ayir: UI, API, CV/job pipeline, storage.
+- Go backend uzerinde `masterfabric-go` mimarisinin klasor/katman ayrimini bozma; yeni endpointleri mevcut patternlere ekle.
 - Ortak sozlesmeleri typed/structured tut: JSON schema, Go struct, TypeScript type.
 - Hata durumlarini demoda saklama: kullaniciya anlasilir hata, loglara teknik detay yaz.
 - Rate limit, API kota ve retry davranisini dusun.
@@ -103,6 +115,8 @@ README en az sunlari icermeli:
 - Kurulum ve calistirma adimlari
 - `.env.example` aciklamasi
 - AI araclari dokumantasyonu: Cursor IDE, ajan kurallari, kullanilan prompt/servis/model, gelistirmeyi nasil hizlandirdigi
+- Hugging Face dataset/model kullanimi ve model secim gerekcesi
+- Cursor CLI/SDK kullanildiysa otomasyon ve komutlar
 - KVKK/etik uyum: anonimlestirme, veri minimizasyonu, ham veri silme taahhudu
 - Demo senaryosu ve beklenen ciktilar
 - Bilinen limitler ve sonraki adimlar

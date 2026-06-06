@@ -1,0 +1,30 @@
+---
+description: Cursor x ALT+TAB hackathon delivery, KVKK, stack, and AI rules
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Cursor Hackathon Rules
+
+Read `AGENTS.md` before making changes. Follow it as the canonical project contract.
+
+Mandatory constraints:
+- Build a working live demo, not only a presentation.
+- Use Next.js for web, Expo for mobile, Go for backend.
+- Use the `masterfabric-go` architecture for backend work; do not create a custom Go architecture.
+- Use Hugging Face for AI datasets/models.
+- Deploy web to Vercel and backend to Render.com.
+- Use Google Street View / Maps APIs through environment variables.
+- Store secrets only in `.env`; never commit `.env` or raw images.
+- Blur or mask faces and license plates before any object detection, training, upload, or demo processing.
+- Detect only inanimate urban objects. Do not implement identity detection, face recognition, plate reading, person profiling, or vehicle/person tracking.
+- Keep frequent meaningful commits and push checkpoints to GitHub.
+- Document Cursor, AI tools, prompt/model choices, KVKK handling, and demo steps in README.
+
+Default implementation priority:
+1. KVKK-safe anonymization gate.
+2. Repeatable object detection output.
+3. Go API using the required architecture.
+4. Next.js map/list/demo UI.
+5. README and live deployment evidence.
