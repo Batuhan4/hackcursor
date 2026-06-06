@@ -1,9 +1,9 @@
 # AI Usage
 
-How AI is used to build and to power this project. The product's AI core is
-**computer vision via Hugging Face** — there is no Gemini/OpenAI/Anthropic or
-other LLM-provider integration in the product, and none may be added without
-an explicit feature need plus updates to `AGENTS.md` and `.env.example`.
+How AI is used to build and power this project. The scoring core is computer
+vision via Hugging Face. Cursor SDK is used server-side to explain structured
+route metrics as a real product feature. There is no Gemini/OpenAI/Anthropic
+fallback.
 
 ## Cursor IDE & agentic ruleset
 
@@ -49,16 +49,24 @@ the local anonymization gate**; checkpoints are promoted to a private Hugging
 Face model repo. Modal is never the product backend (Render is). Tokens come
 from `.env` (`MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`) and are never printed.
 
-## Cursor SDK bonus plan
+## Cursor SDK product integration
 
-Target: a small but real automation — wrap `scripts/generate-demo-report.py`
-in a Cursor SDK agent that reads `data/processed/demo-result.json` and
-produces the jury-facing demo report (`docs/demo-report.md`), optionally
-running the project quality checklist (`scripts/verify.sh`) first.
+`POST /api/route-assistant` is a Vercel server route using
+`@cursor/sdk@1.0.16`. It explains up to three route alternatives from
+structured metrics. Users do not authenticate with Cursor; the API key remains
+server-side.
 
-- Integration point is already marked with `TODO(cursor-sdk)` in
-  `scripts/generate-demo-report.py`.
-- The script works standalone today, so the bonus can never block the live
-  demo (AGENTS.md requirement).
-- Once wired, README gets the exact command + sample output. If Cursor CLI is
-  used instead/in addition, the commands will be documented here.
+- The assistant receives no raw imagery, coordinates, or location history.
+- It cannot calculate or change route scores.
+- It runs in a fresh temporary directory, with sandbox enabled, no ambient
+  Cursor settings, and plan mode.
+- Missing SDK credentials or service failure returns an explicit `503`.
+- There is no mock or Gemini fallback.
+
+The Go service on Render remains the core backend. Full details:
+`docs/cursor-route-assistant.md`.
+
+Dependency note: npm audit currently reports unresolved high-severity transit
+advisories through the SDK's local runtime dependencies. The integration is
+isolated and server-only for the hackathon, but should not be treated as
+production-approved until upstream fixes are available.

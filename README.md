@@ -1,150 +1,145 @@
-# Urban Object Inventory — Cursor x ALT+TAB Hackathon
+# OmniSight - Cursor x ALT+TAB Hackathon
 
-KVKK-safe urban object inventory for Güngören Municipality: street/city
-imagery goes through an **irreversible face & license-plate anonymization
-gate**, then inanimate urban objects (signs, billboards, bins, poles, benches,
-potholes, …) are detected and served to a map/list dashboard the municipality
-can act on.
+OmniSight compares live Google walking alternatives using explainable physical
+street indicators. It helps a person choose a route based on preferences such
+as openness, sidewalk potential, greenery, and active-frontage potential.
 
-**Public benefit:** waste-collection vehicles already drive every street;
-turning their camera footage into a privacy-safe asset/damage inventory gives
-the municipality a continuously refreshed to-do list (broken signs, overflowing
-bins, road damage) without hiring survey crews and without processing anyone's
-identity.
+OmniSight does not predict crime or guarantee safety. It never counts people,
+profiles individuals, reads plates, or tracks people/vehicles. The product
+promise is limited to:
 
-## Mandatory stack
+> Fiziksel cevre gostergelerine gore daha guvenli rota potansiyeli.
+
+## Mandatory Stack
 
 | Layer | Technology | Deploy target |
 | --- | --- | --- |
-| Web dashboard | Next.js (App Router, TS) | Vercel |
-| Mobile shell | Expo (TS) | Expo Go / EAS |
-| Backend API | Go — [masterfabric-go](https://github.com/gurkanfikretgunak/masterfabric-go) architecture | Render.com |
-| Database | Postgres via `DATABASE_URL` | Render Postgres |
-| AI models/datasets | Hugging Face (see `docs/ai-usage.md`) | local cache in `models/` |
-| Imagery source | Google Street View / Maps API | — |
-| Training compute | Modal — **anonymized data only** (see `docs/kvkk.md`) | — |
-| IDE / agents | Cursor + ruleset in `.cursor/rules/` | — |
+| Web application | Next.js App Router, TypeScript | Vercel |
+| Mobile application | Expo, TypeScript | Expo Go / EAS |
+| Core backend | Go using [masterfabric-go](https://github.com/gurkanfikretgunak/masterfabric-go) architecture | Render.com |
+| Database | Postgres through `DATABASE_URL` | Render Postgres |
+| Live walking routes | Google Routes API, `WALK` | Render Go API |
+| CV models and datasets | Hugging Face | local / Modal |
+| Training compute | Modal, anonymized data only | Modal |
+| Product AI assistant | Cursor SDK, server-side | Vercel |
 
-No Gemini/OpenAI/Anthropic or other LLM-provider integration in the product —
-the AI deliverable is computer vision (see `docs/ai-usage.md`).
+Render.com, not Railway, is the required backend target in the hackathon
+brief.
 
-## Repository structure
+## Live Product Flow
 
+1. Next.js sends origin, destination, and preference to the Render Go API.
+2. Go requests live walking alternatives from Google Routes API.
+3. Go returns distance, duration, polyline, attribution, and analysis coverage.
+4. OmniSight re-ranks only routes with sufficient physical-analysis coverage.
+5. When coverage is missing, scores remain `null`; the system never invents a
+   recommendation.
+6. The optional Cursor SDK Route Assistant explains the returned metrics. It
+   cannot calculate or change route scores.
+
+## Repository
+
+```text
+apps/web/            Next.js consumer route experience and Cursor SDK endpoint
+apps/mobile/         Expo mobile experience
+services/api/        Go API following the required masterfabric-go layering
+workers/cv/          anonymization, segmentation, evaluation, Modal training
+packages/contracts/  shared JSON Schemas and TypeScript contracts
+reports/             dataset, training, benchmark, and integration evidence
+presentation/        jury presentation assets
+docs/                architecture, KVKK, AI usage, and demo plan
 ```
-apps/web/            Next.js operational dashboard (demo status, KVKK, detections, API health)
-apps/mobile/         Expo field shell (single screen, field-review placeholder)
-services/api/        Go API — masterfabric-go layering (see docs/architecture.md)
-workers/cv/          Python CV worker — anonymization gate + detection (placeholder mode live)
-packages/contracts/  JSON Schemas + TS types: the shared data contract
-scripts/             check-env / verify / demo-fixture / generate-demo-report
-docs/                architecture, kvkk, ai-usage, demo-plan
-data/fixtures/       synthetic fixture (metadata only — never imagery)
-data/processed/      generated outputs (gitignored)
-```
 
-## Local setup
+## Local Setup
 
 ```bash
-cp .env.example .env          # fill values — .env is never committed
-bash scripts/check-env.sh     # reports PRESENT/MISSING names only, never values
+cp .env.example .env
+bash scripts/check-env.sh
 ```
 
-Run the pieces (each in its own terminal):
+Run each service in a separate terminal:
 
 ```bash
-# Go API → http://localhost:8080
 cd services/api && make run
-
-# Web dashboard → http://localhost:3000
 cd apps/web && npm install && npm run dev
-
-# Mobile shell (Expo)
 cd apps/mobile && npm install && npm run start
-
-# CV worker — deterministic placeholder demo run
-bash scripts/demo-fixture.sh
-python3 scripts/generate-demo-report.py   # writes docs/demo-report.md
 ```
 
-## Environment variables
+## Environment Variables
 
-Placeholders live in `.env.example`; real values only in `.env` (gitignored).
+Real values stay in ignored `.env` / `.env.local` files.
 
 | Name | Used by | Purpose |
 | --- | --- | --- |
-| `GOOGLE_MAPS_API_KEY` / `GOOGLE_STREET_VIEW_API_KEY` | API, worker | imagery source (≤10k request quota, cached) |
-| `HF_TOKEN` / `HUGGINGFACE_API_KEY` | worker, API | Hugging Face model/dataset access |
-| `DATABASE_URL` | API | Render Postgres DSN |
-| `PORT` | API | injected by Render |
-| `CORS_ALLOWED_ORIGINS` | API | comma-separated; default `http://localhost:3000` |
-| `NEXT_PUBLIC_API_BASE_URL` | web | Go API base URL |
-| `EXPO_PUBLIC_API_BASE_URL` | mobile | Go API base URL |
-| `VERCEL_TOKEN`, `RENDER_API_KEY` | deploy tooling | CLI deploys |
-| `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET` | training | Modal compute (anonymized data only) |
+| `GOOGLE_MAPS_API_KEY` | Go API | live Google Routes requests |
+| `GOOGLE_STREET_VIEW_API_KEY` | CV/data tooling | approved Street View access if used |
+| `HF_TOKEN` | CV/training | Hugging Face datasets and models |
+| `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET` | training | private Modal jobs |
+| `DATABASE_URL` | Go API | Render Postgres |
+| `NEXT_PUBLIC_API_BASE_URL` | web | Render Go API URL |
+| `EXPO_PUBLIC_API_BASE_URL` | mobile | Render Go API URL |
+| `CURSOR_API_KEY` | Next.js server only | Cursor SDK Route Assistant |
+| `CURSOR_MODEL` | Next.js server only | defaults to `composer-2` |
+| `VERCEL_TOKEN`, `RENDER_API_KEY` | deployment | provider CLI/API access |
+
+`CURSOR_API_KEY` must never use a `NEXT_PUBLIC_` prefix. End users do not log
+in to Cursor.
+
+## AI and Data
+
+- Dataset: `Reubencf/streetview-global`, sourced from Mapillary under
+  `CC-BY-SA-4.0`.
+- Local privacy gate: face and plate regions are irreversibly masked before
+  inference, training, upload, or display.
+- Segmentation baseline:
+  `nvidia/segformer-b0-finetuned-cityscapes-1024-1024`.
+- Persisted classes are restricted to inanimate physical environment classes.
+- Modal auxiliary training uses only anonymized derivatives and records fixed
+  revisions, seed, hyperparameters, metrics, and checkpoint hash.
+- Cursor SDK explains structured route metrics only. There is no Gemini
+  fallback and no mock AI response.
+
+See [`docs/ai-usage.md`](docs/ai-usage.md),
+[`docs/cursor-route-assistant.md`](docs/cursor-route-assistant.md), and
+[`reports/training-summary.md`](reports/training-summary.md).
+
+## KVKK Boundary
+
+- No face recognition, plate OCR, person counting, demographic inference, or
+  tracking.
+- Raw imagery is never committed or uploaded to Vercel/Render/Modal.
+- Public municipal/MOBESE viewer access is not processing authorization.
+- Municipal camera imagery requires written permission and an official
+  stream/API.
+- Raw imagery is deleted at hackathon end and documented in
+  [`docs/kvkk.md`](docs/kvkk.md).
 
 ## Verification
 
 ```bash
-bash scripts/verify.sh        # runs everything below that exists
+bash scripts/verify.sh
 ```
 
-- contracts: all JSON schemas parse
-- Go: `go vet ./...` + `go test ./...` (router, handlers, config tests)
-- web: `npm run lint` + `npm run typecheck` + `npm run build`
-- mobile: `tsc --noEmit`
-- CV worker: compile + **determinism check** (two runs must be byte-identical)
+Relevant direct checks:
 
-## AI usage
+```bash
+cd services/api && go test ./... && go vet ./...
+cd apps/web && npm run lint && npm run typecheck && npm run build
+cd apps/mobile && npx tsc --noEmit
+```
 
-Documented in full in [`docs/ai-usage.md`](docs/ai-usage.md):
+The integration evidence is recorded in
+[`reports/integrations.md`](reports/integrations.md). The jury flow is in
+[`docs/demo-plan.md`](docs/demo-plan.md).
 
-- **Cursor IDE + ruleset** — `.cursor/rules/hackathon.mdc` (always-on) encodes
-  stack, KVKK and delivery rules; `AGENTS.md` is the canonical agent contract.
-  Agents implement, verify (`scripts/verify.sh`) and commit per checkpoint.
-- **Hugging Face** — face/plate anonymization models
-  (`arnabdhar/YOLOv8-Face-Detection`, `Koushim/yolov8-license-plate-detection`),
-  urban object detection (`shirabendor/YOLOV8-oiv7`), road damage
-  (`rezzzq/yolo12s-road-damage-rdd2022`); weights cached in `models/`
-  (gitignored).
-- **Cursor SDK bonus plan** — wrap `scripts/generate-demo-report.py` in a small
-  Cursor SDK automation that turns detection output into the jury demo report.
-  The script already works standalone, so the bonus can never block the demo.
+## Known Limits
 
-## KVKK summary
-
-Privacy is a delivery gate, not a feature (full text: [`docs/kvkk.md`](docs/kvkk.md)):
-
-1. **Anonymization before detection** — faces & plates are irreversibly
-   blurred/masked first; object detection only ever sees the anonymized
-   derivative. The CV worker refuses raw imagery while the pipeline is pending.
-2. **No identity capability** — no face recognition, no plate reading/OCR, no
-   person profiling, no person/vehicle tracking. The audit trail stores region
-   *counts* only; fields for region contents do not exist in the contracts.
-3. **No raw data in the repo or cloud** — raw imagery is never committed,
-   uploaded, or baked into build artifacts (`data/raw/` is gitignored).
-4. **Deletion commitment** — all raw imagery is deleted at hackathon end and
-   the deletion is documented (checklist in `docs/kvkk.md`).
-
-## Deployment
-
-| Component | Target | Notes |
-| --- | --- | --- |
-| `apps/web` | **Vercel** | project root `apps/web`, set `NEXT_PUBLIC_API_BASE_URL` to the Render URL |
-| `services/api` | **Render.com** | build `go build -o bin/server ./cmd/server`, start `./bin/server`, health check `/health/live` |
-| Database | **Render Postgres** | attach and expose as `DATABASE_URL`; schema in `services/api/migrations/` |
-
-## Demo
-
-3–5 minute jury script with fallbacks: [`docs/demo-plan.md`](docs/demo-plan.md).
-Repeatability is enforced: `scripts/demo-fixture.sh` runs the worker twice and
-fails if outputs differ.
-
-## Known limits / next steps
-
-- Real anonymization + detection pipeline pending (worker is placeholder-mode;
-  it refuses raw imagery by design until the gate is wired).
-- Go API serves a deterministic fixture snapshot; Render Postgres adapter is a
-  skeleton (`services/api/internal/infrastructure/postgres`, migration ready).
-- Web map panel is a placeholder pending Google Maps integration.
-- Local npm `min-release-age` policy pinned expo to 56.0.8 (56.0.9 patch was
-  <2 days old at scaffold time).
+- Current physical-analysis coverage is dataset/demo coverage, not city-wide
+  coverage. Routes without matching coverage are explicitly unranked.
+- Google route payloads are not persistently cached and require Google
+  attribution.
+- Revenue remains a hypothesis: premium preferences, route-neutral local
+  sponsorships, and institutional mobility partnerships.
+- `@cursor/sdk@1.0.16` currently brings unresolved high-severity transit
+  dependency advisories. The endpoint is isolated and server-only, but this
+  must be reassessed before production use.
