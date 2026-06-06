@@ -28,6 +28,7 @@ func (h *RoutesHandler) Compute(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	request.Normalize()
 
 	result, err := h.computeRoutes.Execute(r.Context(), request)
 	if err != nil {

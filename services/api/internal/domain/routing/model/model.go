@@ -1,6 +1,8 @@
 // Package model defines consumer walking-route contracts.
 package model
 
+import "strings"
+
 // Coordinate identifies a waypoint by WGS84 point or human-readable address.
 type Coordinate struct {
 	Lat     float64 `json:"lat,omitempty"`
@@ -21,9 +23,30 @@ const (
 
 // ComputeRoutesRequest asks for live walking alternatives.
 type ComputeRoutesRequest struct {
-	Origin      Coordinate      `json:"origin"`
-	Destination Coordinate      `json:"destination"`
-	Preference  RoutePreference `json:"preference"`
+	Origin             Coordinate      `json:"origin"`
+	Destination        Coordinate      `json:"destination"`
+	Preference         RoutePreference `json:"preference"`
+	OriginAddress      string          `json:"origin_address,omitempty"`
+	DestinationAddress string          `json:"destination_address,omitempty"`
+}
+
+// Normalize maps flat address aliases onto nested origin/destination fields.
+func (r *ComputeRoutesRequest) Normalize() {
+	if originAddress := strings.TrimSpace(r.OriginAddress); originAddress != "" && !r.Origin.hasPointOrAddress() {
+		r.Origin.Address = originAddress
+	}
+	if destinationAddress := strings.TrimSpace(r.DestinationAddress); destinationAddress != "" && !r.Destination.hasPointOrAddress() {
+		r.Destination.Address = destinationAddress
+	}
+}
+
+func (c Coordinate) hasPointOrAddress() bool {
+	if strings.TrimSpace(c.Address) != "" {
+		return true
+	}
+	return c.Lat >= -90 && c.Lat <= 90 &&
+		c.Lng >= -180 && c.Lng <= 180 &&
+		(c.Lat != 0 || c.Lng != 0)
 }
 
 // RouteOption is one Google walking alternative with optional YolDost analysis.

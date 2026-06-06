@@ -143,6 +143,22 @@ func TestComputeRoutesAcceptsHumanReadableAddresses(t *testing.T) {
 	}
 }
 
+func TestComputeRoutesAcceptsFlatAddressAliases(t *testing.T) {
+	router := newTestRouter(t)
+	body := []byte(`{
+		"origin_address":"Gungoren, Istanbul",
+		"destination_address":"Galata Tower, Istanbul"
+	}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/routes", bytes.NewReader(body))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body=%s", rec.Code, rec.Body.String())
+	}
+}
+
 func get(t *testing.T, router http.Handler, path string) (*httptest.ResponseRecorder, []byte) {
 	t.Helper()
 
