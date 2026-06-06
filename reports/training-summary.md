@@ -58,6 +58,11 @@ was not practical to gate and ship inside the hackathon window.
 **Selected:** `20260606T125349Z-modal-scene` (300 samples, 88.33% weak-label
 agreement, macro F1 0.8833 on NVIDIA B200).
 
+**Published Hugging Face model (private):**
+[`0xBatuhan4/yoldost-street-context-v2`](https://huggingface.co/0xBatuhan4/yoldost-street-context-v2)
+— revision `bf949dc91777e367b65d59cf54ca4a67b971cc92`; files `classifier-head.pt`,
+`metrics.json`, `training_config.json`.
+
 Prior baseline run: `20260606T121159Z-modal-scene` (60 samples, 80% weak-label
 agreement).
 
