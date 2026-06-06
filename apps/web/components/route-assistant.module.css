@@ -4,7 +4,7 @@
   bottom: 16px;
   z-index: 40;
   background: var(--brand);
-  color: #ffffff;
+  color: var(--panel);
   font-size: 13.5px;
   font-weight: 600;
   border: none;
@@ -19,7 +19,7 @@
 }
 
 .fab:focus-visible {
-  outline: 2px solid var(--brand-strong);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 
@@ -133,7 +133,7 @@
 .bot[data-error] {
   border-color: var(--err);
   color: var(--err);
-  background: #fdf3f2;
+  background: var(--err-soft);
 }
 
 .typing {
@@ -184,7 +184,7 @@
   padding: 8px 10px;
   font-size: 13px;
   color: var(--ink);
-  background: #ffffff;
+  background: var(--panel);
 }
 
 .input:focus-visible {
@@ -195,7 +195,7 @@
 
 .send {
   background: var(--brand);
-  color: #ffffff;
+  color: var(--panel);
   font-size: 13px;
   font-weight: 600;
   border: none;
@@ -214,6 +214,6 @@
 }
 
 .send:focus-visible {
-  outline: 2px solid var(--brand-strong);
+  outline: 2px solid var(--brand);
   outline-offset: 2px;
 }

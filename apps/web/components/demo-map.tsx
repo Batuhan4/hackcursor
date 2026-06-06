@@ -92,6 +92,13 @@ export default function DemoMap({
             <g
               key={route.id}
               data-selected={selected || undefined}
+              data-role={
+                route.isRecommended
+                  ? "recommended"
+                  : route.isShortest
+                    ? "shortest"
+                    : "warm"
+              }
               className={styles.route}
               onClick={() => onSelectRoute(route.id)}
             >

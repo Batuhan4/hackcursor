@@ -8,6 +8,8 @@
   --brand: #0e7a4a;
   --brand-strong: #0a5c38;
   --brand-soft: #e4f1e9;
+  --route-shortest: #5b6b7a;
+  --route-warm: #a87928;
   --route-muted: #a9b4ac;
   --map-canvas: #e9eee7;
   --map-road: #ffffff;
@@ -16,7 +18,10 @@
   --ok: #0e7a4a;
   --warn: #9a6700;
   --err: #c1342b;
-  --shadow-float: 0 2px 8px rgba(20, 30, 24, 0.12);
+  /* Derived soft status surfaces (pale tints of warn/err on panel). */
+  --warn-soft: #f7efd8;
+  --err-soft: #fdf3f2;
+  --shadow-float: 0 2px 8px rgba(20, 30, 24, 0.1);
   --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   /* Legacy aliases still consumed by the municipal panel styles */

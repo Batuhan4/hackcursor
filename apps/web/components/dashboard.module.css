@@ -51,22 +51,22 @@
 }
 
 .badgeOk {
-  background: #e3f3e8;
+  background: var(--brand-soft);
   color: var(--ok);
 }
 
 .badgeWarn {
-  background: #fff3d6;
+  background: var(--warn-soft);
   color: var(--warn);
 }
 
 .badgeErr {
-  background: #fde8e6;
+  background: var(--err-soft);
   color: var(--err);
 }
 
 .badgeDim {
-  background: #eef1f4;
+  background: var(--surface);
   color: var(--text-dim);
 }
 

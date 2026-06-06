@@ -130,9 +130,16 @@ export default function RoutePlanner() {
   return (
     <div className={styles.app}>
       <header className={styles.header}>
-        <span className={styles.wordmark}>
-          Yol<span className={styles.wordmarkAccent}>Dost</span>
-        </span>
+        <div className={styles.brandBlock}>
+          <span className={styles.wordmark}>
+            Yol<span className={styles.wordmarkAccent}>Dost</span>
+          </span>
+          <span className={styles.headerSub}>
+            {selectedRoute
+              ? `${selectedRoute.badge} rota seçili · ${selectedRoute.durationMin} dk yürüyüş`
+              : "Çevresel göstergelere göre yürüyüş rotası önerisi"}
+          </span>
+        </div>
         <span className={styles.statusPill} data-tone={status.tone}>
           {status.text}
         </span>
@@ -230,6 +237,24 @@ export default function RoutePlanner() {
           selectedRouteId={effectiveSelectedRouteId}
           onSelectRoute={setSelectedRouteId}
         />
+        {selectedRoute && (
+          <aside
+            className={styles.mapSuggestion}
+            aria-label="Yol üstü önerilen durak"
+          >
+            <span className={styles.mapSuggestionTop}>
+              <span className={styles.mapSuggestionTitle}>
+                Yol üstü önerilen durak
+              </span>
+              <span className={styles.mapSuggestionBadge}>Demo</span>
+            </span>
+            <p className={styles.mapSuggestionText}>
+              {selectedRoute.badge} rota üzerinde açık cephe ve kaldırım
+              göstergeleri yüksek bir cadde kesiti — çevresel göstergelere göre
+              önerilen mola noktası.
+            </p>
+          </aside>
+        )}
       </div>
 
       <section className={styles.results} aria-label="Rota seçenekleri">

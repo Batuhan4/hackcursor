@@ -8,16 +8,16 @@ import styles from "./page.module.css";
 export const metadata: Metadata = {
   title: "YolDost — Belediye Operasyon Paneli",
   description:
-    "Explainable, KVKK-safe physical street analysis for municipal planning",
+    "Belediye planlaması için açıklanabilir, KVKK uyumlu fiziksel sokak analizi",
 };
 
 export default function PanelPage() {
   return (
     <main className={styles.main}>
       <header className={styles.header}>
-        <h1 className={styles.title}>YolDost Street Intelligence</h1>
+        <h1 className={styles.title}>YolDost Sokak Analizi</h1>
         <span className={styles.tagline}>
-          Explainable physical street analysis for municipal planning
+          Belediye planlaması için açıklanabilir fiziksel sokak analizi
         </span>
         <Link href="/">← Rota uygulaması</Link>
       </header>
@@ -25,9 +25,10 @@ export default function PanelPage() {
       <Dashboard />
 
       <footer className={styles.footer}>
-        Operational dashboard — detection data comes only from the Go API
-        (services/api). If the API is offline, the final-demo UI marks live
-        data as unavailable instead of rendering embedded fixture rows.
+        Operasyon paneli — tespit verileri yalnızca Go API&apos;den
+        (services/api) gelir. API çevrimdışıysa final demo arayüzü gömülü
+        örnek satırlar göstermek yerine canlı veriyi kullanılamaz olarak
+        işaretler.
       </footer>
     </main>
   );

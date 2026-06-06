@@ -35,20 +35,34 @@
 
 .routeCasing {
   fill: none;
-  stroke: #ffffff;
+  stroke: var(--map-road);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
 }
 
+/* DESIGN.md: rota başına tek renk; seçili olmayan ince ve soluk kalır. */
 .routeLine {
   fill: none;
   stroke: var(--route-muted);
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
+  stroke-opacity: 0.55;
   pointer-events: none;
+}
+
+.route[data-role="recommended"] .routeLine {
+  stroke: var(--brand);
+}
+
+.route[data-role="shortest"] .routeLine {
+  stroke: var(--route-shortest);
+}
+
+.route[data-role="warm"] .routeLine {
+  stroke: var(--route-warm);
 }
 
 .route[data-selected] .routeCasing {
@@ -56,8 +70,8 @@
 }
 
 .route[data-selected] .routeLine {
-  stroke: var(--brand);
   stroke-width: 2.6;
+  stroke-opacity: 1;
 }
 
 .routeHit {
@@ -72,7 +86,7 @@
 }
 
 .markerStart circle {
-  fill: #ffffff;
+  fill: var(--panel);
   stroke: var(--brand);
   stroke-width: 1.1;
 }
@@ -85,12 +99,12 @@
 
 .markerEnd circle {
   fill: var(--brand);
-  stroke: #ffffff;
+  stroke: var(--panel);
   stroke-width: 1.1;
 }
 
 .markerEnd text {
-  fill: #ffffff;
+  fill: var(--panel);
   font-size: 3.2px;
   font-weight: 700;
 }

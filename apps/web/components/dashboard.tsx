@@ -102,26 +102,28 @@ function mean(analyses: StreetAnalysis[], key: keyof StreetAnalysis) {
 function StreetOverviewPanel({ analyses }: { analyses: StreetAnalysis[] }) {
   const hasAnalyses = analyses.length > 0;
   const metrics = [
-    ["Physical density", mean(analyses, "built_density_pct")],
-    ["Openness", mean(analyses, "openness_score")],
-    ["Sidewalk proxy", mean(analyses, "sidewalk_availability_score")],
-    ["Greenery", mean(analyses, "greenery_score")],
-    ["Comfort potential", mean(analyses, "pedestrian_comfort_potential")],
+    ["Fiziksel yoğunluk", mean(analyses, "built_density_pct")],
+    ["Açıklık", mean(analyses, "openness_score")],
+    ["Kaldırım göstergesi", mean(analyses, "sidewalk_availability_score")],
+    ["Yeşillik", mean(analyses, "greenery_score")],
+    ["Konfor potansiyeli", mean(analyses, "pedestrian_comfort_potential")],
   ] as const;
 
   return (
     <section
       className={`${styles.panel} ${styles.panelWide}`}
-      aria-label="Street intelligence overview"
+      aria-label="Sokak analizi genel görünümü"
     >
       <h2 className={styles.panelTitle}>
-        Street Intelligence
+        Sokak Analizi
         <span
           className={`${styles.badge} ${
             hasAnalyses ? styles.badgeOk : styles.badgeWarn
           }`}
         >
-          {hasAnalyses ? `${analyses.length} live rows` : "live API required"}
+          {hasAnalyses
+            ? `${analyses.length} canlı satır`
+            : "canlı API gerekli"}
         </span>
       </h2>
       {hasAnalyses ? (
@@ -130,20 +132,20 @@ function StreetOverviewPanel({ analyses }: { analyses: StreetAnalysis[] }) {
             <div className={styles.metric} key={label}>
               <span className={styles.metricLabel}>{label}</span>
               <strong>{value.toFixed(1)}</strong>
-              <span className={styles.metricUnit}>/100 proxy</span>
+              <span className={styles.metricUnit}>/100 gösterge</span>
             </div>
           ))}
         </div>
       ) : (
         <p className={styles.panelText}>
-          No live street-analysis rows returned. The final demo does not render
-          embedded fixture metrics when the API is unavailable.
+          Canlı sokak analizi satırı dönmedi. API kullanılamadığında final
+          demo gömülü örnek metrik göstermez.
         </p>
       )}
       <p className={styles.methodNote}>
-        SegFormer pixel ratios from road, sidewalk, building, wall, sky and
-        vegetation. No person counting, crime prediction or guaranteed safety
-        claim.
+        Yol, kaldırım, bina, duvar, gökyüzü ve yeşillik için SegFormer piksel
+        oranları. Kişi sayımı, suç tahmini veya güvenlik garantisi iddiası
+        yoktur.
       </p>
     </section>
   );
@@ -151,15 +153,17 @@ function StreetOverviewPanel({ analyses }: { analyses: StreetAnalysis[] }) {
 
 function MunicipalCameraPanel() {
   return (
-    <section className={styles.panel} aria-label="Municipal camera context">
+    <section className={styles.panel} aria-label="Belediye kamera bağlamı">
       <h2 className={styles.panelTitle}>
-        Live Municipal Context
-        <span className={`${styles.badge} ${styles.badgeWarn}`}>view only</span>
+        Canlı Belediye Bağlamı
+        <span className={`${styles.badge} ${styles.badgeWarn}`}>
+          yalnızca görüntüleme
+        </span>
       </h2>
       <p className={styles.panelText}>
-        İBB publishes traffic camera views for public observation. YolDost
-        links to the official viewer but does not download or analyze that
-        stream without written authorization.
+        İBB, trafik kamera görüntülerini kamusal gözlem için yayınlar. YolDost
+        resmî görüntüleyiciye bağlantı verir; yazılı yetki olmadan bu akışı
+        indirmez veya analiz etmez.
       </p>
       <a
         className={styles.externalLink}
@@ -167,7 +171,7 @@ function MunicipalCameraPanel() {
         target="_blank"
         rel="noreferrer"
       >
-        Open official İBB camera service ↗
+        Resmî İBB kamera hizmetini aç ↗
       </a>
     </section>
   );
@@ -181,24 +185,24 @@ function StreetAnalysisPanel({ analyses }: { analyses: StreetAnalysis[] }) {
   return (
     <section
       className={`${styles.panel} ${styles.panelWide}`}
-      aria-label="Physical street analyses"
+      aria-label="Fiziksel sokak analizleri"
     >
       <h2 className={styles.panelTitle}>
-        Physical Street Analysis
+        Fiziksel Sokak Analizi
         <span className={`${styles.badge} ${styles.badgeDim}`}>
-          {analyses.length} rows
+          {analyses.length} satır
         </span>
       </h2>
       <div className={styles.tableWrap}>
         <table>
           <thead>
             <tr>
-              <th>Source</th>
-              <th>Built</th>
-              <th>Open</th>
-              <th>Sidewalk</th>
-              <th>Green</th>
-              <th>Comfort potential</th>
+              <th>Kaynak</th>
+              <th>Yapı</th>
+              <th>Açıklık</th>
+              <th>Kaldırım</th>
+              <th>Yeşillik</th>
+              <th>Konfor potansiyeli</th>
             </tr>
           </thead>
           <tbody>
@@ -223,8 +227,8 @@ function StreetAnalysisPanel({ analyses }: { analyses: StreetAnalysis[] }) {
             ) : (
               <tr>
                 <td colSpan={6}>
-                  Live API returned no street-analysis rows; no embedded
-                  fallback is shown.
+                  Canlı API sokak analizi satırı döndürmedi; gömülü yedek
+                  veri gösterilmez.
                 </td>
               </tr>
             )}
@@ -246,6 +250,16 @@ function DemoStatusPanel({
 }) {
   const status =
     run?.status ?? (apiState === "checking" ? "checking" : "unavailable");
+  const statusLabel =
+    status === "completed"
+      ? "tamamlandı"
+      : status === "failed"
+        ? "başarısız"
+        : status === "unavailable"
+          ? "kullanılamıyor"
+          : status === "checking"
+            ? "kontrol ediliyor"
+            : status;
   const statusBadge =
     status === "completed"
       ? styles.badgeOk
@@ -254,38 +268,40 @@ function DemoStatusPanel({
         : styles.badgeWarn;
 
   return (
-    <section className={styles.panel} aria-label="Demo status">
+    <section className={styles.panel} aria-label="Demo durumu">
       <h2 className={styles.panelTitle}>
-        Demo Status
-        <span className={`${styles.badge} ${statusBadge}`}>{status}</span>
+        Demo Durumu
+        <span className={`${styles.badge} ${statusBadge}`}>{statusLabel}</span>
       </h2>
       <div className={styles.statRow}>
         <div className={styles.stat}>
           <div className={styles.statValue}>{run?.image_count ?? "—"}</div>
-          <div className={styles.statLabel}>images</div>
+          <div className={styles.statLabel}>görüntü</div>
         </div>
         <div className={styles.stat}>
           <div className={styles.statValue}>{run?.detection_count ?? "—"}</div>
-          <div className={styles.statLabel}>detections</div>
+          <div className={styles.statLabel}>tespit</div>
         </div>
         <div className={styles.stat}>
           <div className={styles.statValue}>
             {run?.anonymized_region_count ?? "—"}
           </div>
-          <div className={styles.statLabel}>regions masked</div>
+          <div className={styles.statLabel}>maskelenen bölge</div>
         </div>
       </div>
       <dl className={styles.kv}>
-        <dt>Run</dt>
+        <dt>Çalıştırma</dt>
         <dd>
-          {run ? `${run.name} (${run.id})` : "No live demo run returned"}
+          {run ? `${run.name} (${run.id})` : "Canlı demo çalıştırması dönmedi"}
         </dd>
         <dt>Model</dt>
         <dd>{run?.model_id ?? "—"}</dd>
-        <dt>API data</dt>
-        <dd>{apiState === "online" ? "live API response" : "unavailable"}</dd>
-        <dt>Repository</dt>
-        <dd>{repositoryStatus ?? "unavailable"}</dd>
+        <dt>API verisi</dt>
+        <dd>
+          {apiState === "online" ? "canlı API yanıtı" : "kullanılamıyor"}
+        </dd>
+        <dt>Depo</dt>
+        <dd>{repositoryStatus ?? "kullanılamıyor"}</dd>
       </dl>
     </section>
   );
@@ -305,24 +321,31 @@ function ApiHealthPanel({
         ? styles.badgeDim
         : styles.badgeErr;
 
+  const apiStateLabel =
+    apiState === "online"
+      ? "çevrimiçi"
+      : apiState === "checking"
+        ? "kontrol ediliyor"
+        : "çevrimdışı";
+
   return (
-    <section className={styles.panel} aria-label="API health">
+    <section className={styles.panel} aria-label="API sağlığı">
       <h2 className={styles.panelTitle}>
-        API Health
+        API Sağlığı
         <span className={`${styles.badge} ${badge}`}>
           <span
             className={`${styles.dot} ${apiState === "online" ? styles.dotOk : styles.dotErr}`}
           />
-          {apiState}
+          {apiStateLabel}
         </span>
       </h2>
       <dl className={styles.kv}>
-        <dt>Base URL</dt>
-        <dd>{API_BASE_URL || "not configured"}</dd>
-        <dt>Liveness</dt>
+        <dt>Temel URL</dt>
+        <dd>{API_BASE_URL || "yapılandırılmadı"}</dd>
+        <dt>Canlılık</dt>
         <dd>/health/live</dd>
-        <dt>Readiness</dt>
-        <dd>{readiness?.status ?? "unreachable"}</dd>
+        <dt>Hazırlık</dt>
+        <dd>{readiness?.status ?? "erişilemiyor"}</dd>
         {readiness?.services &&
           Object.entries(readiness.services).map(([name, status]) => (
             <ServiceRow key={name} name={name} status={status} />
@@ -343,26 +366,26 @@ function ServiceRow({ name, status }: { name: string; status: string }) {
 
 function KvkkPanel({ run }: { run: DemoRun | null }) {
   return (
-    <section className={styles.panel} aria-label="KVKK status">
+    <section className={styles.panel} aria-label="KVKK durumu">
       <h2 className={styles.panelTitle}>
-        KVKK Status
+        KVKK Durumu
         <span className={`${styles.badge} ${styles.badgeOk}`}>
-          anonymization-first
+          önce anonimleştirme
         </span>
       </h2>
       <ul className={styles.checklist}>
         <li>
-          Faces &amp; license plates irreversibly masked{" "}
-          <strong>before</strong> object detection (
-          {run?.anonymized_region_count ?? 0} regions in this run)
+          Yüzler ve plakalar obje tespitinden <strong>önce</strong> geri
+          döndürülemez şekilde maskelenir (bu çalıştırmada{" "}
+          {run?.anonymized_region_count ?? 0} bölge)
         </li>
         <li>
-          No face recognition, plate reading or identity detection — out of
-          scope by design
+          Yüz tanıma, plaka okuma veya kimlik tespiti yok — tasarım gereği
+          kapsam dışı
         </li>
-        <li>Only inanimate urban objects are detected and stored</li>
-        <li>Raw imagery is never committed, uploaded or displayed</li>
-        <li>Raw data is deleted at hackathon end (see docs/kvkk.md)</li>
+        <li>Yalnızca cansız kentsel objeler tespit edilir ve saklanır</li>
+        <li>Ham görüntüler asla commit edilmez, yüklenmez veya gösterilmez</li>
+        <li>Ham veri hackathon sonunda silinir (bkz. docs/kvkk.md)</li>
       </ul>
     </section>
   );
@@ -372,18 +395,19 @@ function MapListPanel({ points }: { points: Detection[] }) {
   return (
     <section
       className={`${styles.panel} ${styles.panelWide}`}
-      aria-label="Map and locations"
+      aria-label="Harita ve konumlar"
     >
       <h2 className={styles.panelTitle}>
-        Map / Locations
+        Harita / Konumlar
         <span className={`${styles.badge} ${styles.badgeDim}`}>
-          municipal integration pending
+          belediye entegrasyonu beklemede
         </span>
       </h2>
       <div className={styles.mapBox}>
-        <span>Municipal segment map integration pending</span>
+        <span>Belediye segment haritası entegrasyonu beklemede</span>
         <span>
-          Detected points will render here with anonymized evidence popups.
+          Tespit edilen noktalar burada anonimleştirilmiş kanıt
+          baloncuklarıyla gösterilecek.
         </span>
       </div>
       <div className={styles.coordList}>
@@ -394,7 +418,7 @@ function MapListPanel({ points }: { points: Detection[] }) {
             </span>
           ))
         ) : (
-          <span>No live location rows returned.</span>
+          <span>Canlı konum satırı dönmedi.</span>
         )}
       </div>
     </section>
@@ -405,12 +429,12 @@ function DetectionsPanel({ detections }: { detections: Detection[] }) {
   return (
     <section
       className={`${styles.panel} ${styles.panelWide}`}
-      aria-label="Detections"
+      aria-label="Tespitler"
     >
       <h2 className={styles.panelTitle}>
-        Detections
+        Tespitler
         <span className={`${styles.badge} ${styles.badgeDim}`}>
-          {detections.length} rows
+          {detections.length} satır
         </span>
       </h2>
       <div className={styles.tableWrap}>
@@ -418,10 +442,10 @@ function DetectionsPanel({ detections }: { detections: Detection[] }) {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Image</th>
-              <th>Class</th>
-              <th>Confidence</th>
-              <th>Lat / Lng</th>
+              <th>Görüntü</th>
+              <th>Sınıf</th>
+              <th>Güven</th>
+              <th>Enlem / Boylam</th>
             </tr>
           </thead>
           <tbody>
@@ -448,8 +472,7 @@ function DetectionsPanel({ detections }: { detections: Detection[] }) {
             ) : (
               <tr>
                 <td colSpan={5}>
-                  Live API returned no detections; no embedded fallback is
-                  shown.
+                  Canlı API tespit döndürmedi; gömülü yedek veri gösterilmez.
                 </td>
               </tr>
             )}

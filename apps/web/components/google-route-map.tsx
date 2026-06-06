@@ -46,6 +46,14 @@ interface GoogleRouteMapProps {
   onSelectRoute: (routeId: string) => void;
 }
 
+// DESIGN.md route tokens (Maps API requires literal hex values):
+// brand #0E7A4A, route-shortest #5B6B7A, route-warm #A87928.
+function routeStrokeColor(route: RouteOption): string {
+  if (route.isRecommended) return "#0E7A4A";
+  if (route.isShortest) return "#5B6B7A";
+  return "#A87928";
+}
+
 export default function GoogleRouteMap(props: GoogleRouteMapProps) {
   if (!MAPS_API_KEY) {
     return <DemoMap {...props} />;
@@ -124,8 +132,8 @@ function GoogleRouteMapInner({
       const polyline = new google.maps.Polyline({
         path: route.geoPath,
         map,
-        strokeColor: selected ? "#1f6f4a" : "#6b7c93",
-        strokeOpacity: selected ? 1 : 0.65,
+        strokeColor: routeStrokeColor(route),
+        strokeOpacity: selected ? 1 : 0.45,
         strokeWeight: selected ? 6 : 4,
         zIndex: selected ? 2 : 1,
         clickable: true,
