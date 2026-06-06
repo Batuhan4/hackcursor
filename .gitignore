@@ -1,0 +1,50 @@
+# Gizli bilgiler — ASLA commit etme
+.env
+.env.local
+.env*.local
+*.pem
+*.key
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+.vercel/
+
+# Go
+*.exe
+*.test
+*.out
+/bin/
+/tmp/
+
+# Python (CV pipeline)
+.venv/
+__pycache__/
+*.pyc
+
+# KVKK / veri güvenliği — ham veya kişisel veri içerebilecek dosyalar
+data/raw/
+data/private/
+data/interim/
+datasets/
+captures/
+uploads/
+exports/raw/
+
+# Model ağırlıkları (büyük dosyalar)
+*.pt
+*.onnx
+*.weights
+
+# Expo / React Native
+.expo/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# OS / Editor
+.DS_Store
+*.log
