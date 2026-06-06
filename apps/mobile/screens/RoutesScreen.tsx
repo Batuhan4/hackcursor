@@ -77,8 +77,8 @@ export default function RoutesScreen({
           işaret etmelidir.
         </Text>
       )}
-      {snapshot.errors.map((error) => (
-        <Text key={error} style={shared.error}>
+      {snapshot.errors.map((error, index) => (
+        <Text key={`${index}-${error}`} style={shared.error}>
           {error}
         </Text>
       ))}
