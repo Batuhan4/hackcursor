@@ -32,7 +32,9 @@ Yeni dependency ekleme, mimariyi buyutme veya stack disina cikma ancak acik tekn
 
 - Cursor IDE kullanimi zorunludur.
 - Agentic ruleset repo icinde `.cursor/rules/` altinda tutulur.
-- Cursor CLI veya Cursor SDK kullanilirsa README'de hangi otomasyon icin kullanildigi belgelenir; bu AI Adaptasyonu icin bonus deger tasir.
+- Cursor SDK kullanimi hedeflenir; AI Adaptasyonu bonusu icin projede kucuk ama gercek bir otomasyonla kullan ve README'de belgeleyerek goster.
+- Cursor CLI de kullanilabiliyorsa README'de hangi komut/otomasyon icin kullanildigi belgelenir; Cursor SDK onceliklidir.
+- Cursor SDK entegrasyonu urun cekirdegini riske atmamalidir. Dar zamanda tercih edilen kapsam: README/checklist/demo raporu ureten veya proje kalite kapilarini calistiran yardimci script.
 - README, kullanilan AI araclarini, prompt tekniklerini, model/servis kararlarini, Hugging Face dataset/model akisini ve bu araclarin gelistirmeyi nasil hizlandirdigini acikca anlatmalidir.
 
 ## Ortam Degiskenleri ve CLI Yetkileri
@@ -49,7 +51,7 @@ Beklenen degisken aileleri:
 - `RENDER_API_KEY`
 - `HUGGINGFACE_API_KEY` veya `HF_TOKEN`
 - `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` veya kullanilan diger AI servis anahtarlari
-- `GEMINI_API_KEY` veya kullanilan diger Google AI servis anahtarlari
+- `GEMINI_API_KEY` veya kullanilan diger Google AI servis anahtarlari; opsiyoneldir, MVP icin zorunlu degildir
 - `GEMINI_MODEL`; varsayilan tercih `gemini-3.1-flash-lite`
 - `DATABASE_URL`
 - `NEXT_PUBLIC_API_BASE_URL`
@@ -117,7 +119,8 @@ README en az sunlari icermeli:
 - `.env.example` aciklamasi
 - AI araclari dokumantasyonu: Cursor IDE, ajan kurallari, kullanilan prompt/servis/model, gelistirmeyi nasil hizlandirdigi
 - Hugging Face dataset/model kullanimi ve model secim gerekcesi
-- Cursor CLI/SDK kullanildiysa otomasyon ve komutlar
+- Cursor SDK ile ek puan hedefi: hangi script/otomasyon icin kullanildigi, nasil calistirildigi ve ciktisi
+- Cursor CLI kullanildiysa otomasyon ve komutlar
 - KVKK/etik uyum: anonimlestirme, veri minimizasyonu, ham veri silme taahhudu
 - Demo senaryosu ve beklenen ciktilar
 - Bilinen limitler ve sonraki adimlar
