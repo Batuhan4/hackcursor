@@ -4,11 +4,32 @@ This folder holds the jury-facing presentation source and evidence pointers.
 Use `docs/presentation-evidence.md` as the canonical source sheet while building
 slides, exports, or speaker notes.
 
-## Deck PDF
+## Pitch Deck
 
-- `yoldost-deck.pdf` — jury slide deck export (copied from `research/hackcursor.pdf`).
-- Open with any PDF viewer; keep in sync with repo evidence in
-  `docs/presentation-evidence.md` when slides change.
+- `pitch-deck.html` — canonical jury deck (19 slides, Turkish, self-contained,
+  works offline). Open directly in a browser; navigate with `←` `→` / `Space`,
+  `F` for fullscreen, `Ctrl+P` for PDF.
+- `yoldost-deck.pdf` — committed PDF export of `pitch-deck.html`. Regenerate
+  after slide edits with:
+
+  ```bash
+  google-chrome-stable --headless=new --disable-gpu \
+    --user-data-dir="$(mktemp -d)" --virtual-time-budget=15000 \
+    --no-pdf-header-footer \
+    --print-to-pdf=presentation/yoldost-deck.pdf \
+    "file://$PWD/presentation/pitch-deck.html"
+  ```
+
+- Live URL: the deck is served at **`/pitch`** on the Vercel deployment.
+  `apps/web/scripts/sync-pitch.mjs` copies it into `apps/web/public/` at
+  prebuild; the `/pitch` rewrite lives in `apps/web/next.config.ts`.
+- App screenshots: drop `assets/app-01.png` … `assets/app-06.png` into this
+  folder — the deck shows them automatically (labeled placeholders until
+  then). Commit + redeploy to refresh `/pitch`.
+- Demo video: drop `demo.mp4` into this folder for the final slide; commit it
+  so the Vercel build serves it at `/pitch` too.
+- The original project-selection research report stays at
+  `research/hackcursor.pdf`.
 
 ## Evidence To Open During Demo
 
@@ -35,9 +56,9 @@ slides, exports, or speaker notes.
       from POI/open-business context, main-street proximity, public/open data,
       or authorized aggregated municipal data.
 - [ ] KVKK slide says faces/plates are irreversibly masked before analysis.
-- [ ] Metrics slide labels `weak_label_context_agreement` 80% and
-      `macro_f1_weak_label_context` 0.80 as weak-label auxiliary
-      activity/environment context metrics.
+- [x] Metrics slide labels `weak_label_context_agreement` 88.33% and
+      `macro_f1_weak_label_context` 0.8833 (selected 300-sample run) as
+      weak-label auxiliary activity/environment context metrics.
 - [ ] Metrics slide explicitly says SegFormer mIoU is not claimed without
       pixel-level labels.
 - [ ] Cursor slide separates Cursor IDE/rules, Cursor SDK product endpoint, and

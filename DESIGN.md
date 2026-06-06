@@ -1,26 +1,27 @@
 ---
-version: alpha
+version: v1-rebrand
 name: YolDost
 description: >-
   Calm, map-first navigation design language for the YolDost consumer
-  routing experience. DRAFT v0 — palette and type choices are provisional
-  and will be finalized together with the team; treat tokens as the current
-  single source of truth until then.
+  routing experience. v1 rebrand palette (adopted 2026-06-06): Apple-style
+  soft light surfaces with an active green + near-black accent pair. Treat
+  tokens as the single source of truth.
 colors:
-  ink: "#1A231D"
-  ink-dim: "#5A6B60"
-  surface: "#F3F5F2"
-  panel: "#FFFFFF"
-  border: "#DBE2DA"
-  brand: "#0E7A4A"
-  brand-strong: "#0A5C38"
-  brand-soft: "#E4F1E9"
+  ink: "#0B0F12"
+  ink-dim: "#4A5560"
+  surface: "#F4F5F4"
+  panel: "#EAECE9"
+  raised: "#FFFFFF"
+  border: "#DCE1DC"
+  brand: "#2F9E67"
+  brand-strong: "#1B4332"
+  brand-soft: "#E2EDE8"
   route-shortest: "#5B6B7A"
   route-warm: "#A87928"
-  map-canvas: "#E9EEE7"
+  map-canvas: "#EAECE9"
   map-road: "#FFFFFF"
-  map-park: "#D5E6CF"
-  ok: "#0E7A4A"
+  map-park: "#D9E8DF"
+  ok: "#2F9E67"
   warn: "#9A6700"
   err: "#C1342B"
 typography:
@@ -61,8 +62,8 @@ spacing:
   xl: 24px
 components:
   button-primary:
-    backgroundColor: "{colors.brand}"
-    textColor: "{colors.panel}"
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.raised}"
     rounded: "{rounded.md}"
     padding: "{spacing.md}"
   button-primary-hover:
@@ -77,7 +78,7 @@ components:
     textColor: "{colors.ink}"
     rounded: "{rounded.md}"
   mode-chip:
-    backgroundColor: "{colors.panel}"
+    backgroundColor: "{colors.raised}"
     textColor: "{colors.ink-dim}"
     rounded: "{rounded.full}"
   mode-chip-selected:
@@ -107,18 +108,22 @@ All user-facing copy is Turkish. Claims are bounded by product policy:
 "daha güvenli rota potansiyeli" / "çevresel göstergelere göre önerilen
 rota" — never guaranteed safety.
 
-> Status: DRAFT v0. The accent and neutrals below are a working proposal so
-> implementation can proceed; the team will revisit them together. Changing
-> them should only require editing the tokens above and the CSS custom
+> Status: v1 rebrand, adopted 2026-06-06. Supersedes DRAFT v0. Changing
+> colors should only require editing the tokens above and the CSS custom
 > properties that mirror them.
 
 ## Colors
 
-A single restrained accent on warm-neutral surfaces. `brand` is a deep
-green: it supports the comfort/safety signal set (green areas, openness,
-cleanliness, sidewalk quality and active-route potential) while staying
-distinct from the default blue of mainstream map apps. Everything else is
-quiet: near-black green-tinted ink on off-white panels over a pale `surface`.
+Apple-style minimalist light theme. 70–80% of any screen is `surface`
+(#F4F5F4 soft grey) and `panel` (#EAECE9 card background, with `border`
+#DCE1DC as the light grey-green line); `raised` (#FFFFFF) is for inputs and
+floating sheets. Interaction and key data use the accent pair: `brand`
+(#2F9E67 active green — "Güvenli Rota Aktif" signals, icons, active page
+indicators) and `ink` (#0B0F12 near-black — primary buttons like "Hemen
+Başla" / "Devam Et" and headlines). `brand-strong` (#1B4332 dark forest
+green) frames the safe-route card and gives depth; `brand-soft` (#E2EDE8
+very light green) is the safe-route card background. `ink-dim` (#4A5560
+soft fume) keeps secondary text from drowning the design in black.
 
 Route lines get one color each: the recommended route uses `brand`, the
 shortest route uses `route-shortest` (slate), a warm alternative uses
