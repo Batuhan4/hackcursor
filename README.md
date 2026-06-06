@@ -102,6 +102,7 @@ in to Cursor.
 | Expo mobile | `EXPO_PUBLIC_API_BASE_URL=https://omnisight-api-70gd.onrender.com` | open Expo Go/EAS build and confirm it shows the Render API target |
 | Cursor SDK assistant | `CURSOR_API_KEY` on Vercel only | `POST /api/route-assistant` from the web UI |
 | Hugging Face model (Modal v2) | [0xBatuhan4/yoldost-street-context-v2](https://huggingface.co/0xBatuhan4/yoldost-street-context-v2) | private repo; `classifier-head.pt` + `metrics.json` from run `20260606T125349Z-modal-scene` |
+| Jury pitch deck | [https://web-lake-phi-31.vercel.app/pitch](https://web-lake-phi-31.vercel.app/pitch) — source `presentation/pitch-deck.html`, PDF `presentation/yoldost-deck.pdf` | open `/pitch`; arrows navigate, `F` fullscreen |
 
 External smoke-test commands:
 
