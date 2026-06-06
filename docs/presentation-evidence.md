@@ -237,10 +237,14 @@ Prior recorded run (60-sample baseline):
 - Scope: auxiliary `street_activity_environment_context_auxiliary`
   classifier.
 
-Selected recorded run (v2 — fill after rerun):
+Selected recorded run (v2):
 
-- Run ID: pending v2 Modal rerun.
+- Run ID: `20260606T125349Z-modal-scene`.
 - Scope: auxiliary `street_activity_environment_context_auxiliary_v2`
+- Samples: 300 (150 urban + 150 suburban), preflight PASS.
+- GPU: NVIDIA B200; training ~24s.
+- Metrics: `weak_label_context_agreement` 88.33%, `macro_f1_weak_label_context` 0.8833.
+- Report: `reports/runs/20260606T125349Z-modal-scene/report.md`.
   classifier.
 - Report: `reports/runs/20260606T121159Z-modal-scene/report.md`.
 - Preflight: PASS (`records=60`, `files=60`, `sha256=60`,
@@ -279,7 +283,7 @@ Latest rerun:
 - [x] `python3 workers/cv/preflight_manifest.py` passed immediately before any
       rerun/upload: `records=60`, `files=60`, `sha256=60`,
       `faces_masked=1`, `plates_masked=13`.
-- [x] Latest Modal rerun ID: `20260606T121159Z-modal-scene`.
+- [x] Latest Modal rerun ID: `20260606T125349Z-modal-scene` (300 samples, 88.33%).
 - [x] Latest Modal rerun GPU: NVIDIA B200.
 - [x] Latest Modal rerun weak-label agreement: 80.00%.
 - [x] Latest Modal rerun macro F1: 0.8000.

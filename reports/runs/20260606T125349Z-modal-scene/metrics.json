@@ -1,0 +1,291 @@
+{
+  "run_id": "20260606T125349Z-modal-scene",
+  "created_at": "2026-06-06T12:53:53.354372+00:00",
+  "task": "street_activity_environment_context_auxiliary_v2",
+  "training_target": {
+    "name": "street_activity_environment_context_auxiliary_v2",
+    "presentation_label": "Weak-label street activity/environment context (v2)",
+    "label_source": "Reubencf/streetview-global setting + infrastructure fields",
+    "label_mapping": {
+      "suburban": "lower-density street context proxy",
+      "urban": "higher-activity / main-street context proxy",
+      "high_comfort_proxy": "well-maintained infrastructure proxy",
+      "medium_comfort_proxy": "moderate infrastructure proxy",
+      "low_comfort_proxy": "poor/minimal infrastructure proxy"
+    },
+    "safe_signal_families": [
+      {
+        "name": "crowd_activity_proxy",
+        "allowed_sources": [
+          "POI/open-business density",
+          "main-street proximity",
+          "transit/touristic activity",
+          "authorized aggregate city data when available"
+        ],
+        "current_training_signal": "weak urban/suburban context labels only; no person counting"
+      },
+      {
+        "name": "environment_quality_comfort",
+        "allowed_sources": [
+          "lighting cues when available",
+          "sidewalk/walkability",
+          "cleanliness/maintenance when available",
+          "physical openness",
+          "greenery/ordered public space"
+        ],
+        "current_training_signal": "weak infrastructure comfort proxy labels from dataset metadata"
+      }
+    ],
+    "not_claimed": [
+      "live crowd size",
+      "unauthorized camera person counting",
+      "identity or demographic profiling",
+      "crime prediction",
+      "guaranteed safety",
+      "SegFormer mIoU without pixel labels",
+      "ground-truth infrastructure inspection accuracy"
+    ]
+  },
+  "metric_scope": "weak-label agreement with urban/suburban context labels; usable as auxiliary evidence for activity/environment context only",
+  "dataset": {
+    "id": "Reubencf/streetview-global",
+    "revision": "a206537534dc0e8165e0e7d36f08df14795127db",
+    "license": "CC-BY-SA-4.0",
+    "source": "Mapillary contributors via Hugging Face",
+    "selection": {
+      "setting": [
+        "urban",
+        "suburban"
+      ],
+      "time_of_day": [
+        "day"
+      ],
+      "seed": 42,
+      "balanced_per_class": {
+        "urban": 150,
+        "suburban": 150
+      },
+      "total_target": 300,
+      "weak_label_fields": [
+        "setting",
+        "infrastructure",
+        "weather",
+        "time_of_day",
+        "infrastructure_comfort_proxy"
+      ]
+    }
+  },
+  "anonymization": {
+    "method": "solid_mask",
+    "padding_ratio": 0.2,
+    "face_model": {
+      "id": "arnabdhar/YOLOv8-Face-Detection",
+      "revision": "52fa54977207fa4f021de949b515fb19dcab4488",
+      "threshold": 0.15
+    },
+    "plate_model": {
+      "id": "Koushim/yolov8-license-plate-detection",
+      "revision": "9aaa5cd490abe0c165882ba87f4f62658ab54d01",
+      "threshold": 0.15
+    },
+    "faces_masked": 17,
+    "plates_masked": 14
+  },
+  "base_model": {
+    "id": "google/vit-base-patch16-224",
+    "revision": "3f49326eb077187dfe1c2a2bb15fbd74e6ab91e3"
+  },
+  "gpu": "NVIDIA B200",
+  "seed": 42,
+  "hyperparameters": {
+    "epochs": 12,
+    "batch_size": 16,
+    "learning_rate": 0.0002,
+    "optimizer": "AdamW",
+    "weight_decay": 0.01,
+    "scheduler": "CosineAnnealingLR",
+    "frozen_backbone": true,
+    "unfreeze_last_encoder_block": true,
+    "augmentation": [
+      "RandomHorizontalFlip",
+      "ColorJitter"
+    ]
+  },
+  "split": {
+    "train_count": 240,
+    "validation_count": 60,
+    "train_labels": {
+      "urban": 120,
+      "suburban": 120
+    },
+    "validation_labels": {
+      "suburban": 30,
+      "urban": 30
+    }
+  },
+  "training_seconds": 24.182678,
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 0.637777,
+      "weak_label_context_agreement": 0.75,
+      "learning_rate": 0.00019659
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.33668,
+      "weak_label_context_agreement": 0.8,
+      "learning_rate": 0.0001866
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.200497,
+      "weak_label_context_agreement": 0.85,
+      "learning_rate": 0.00017071
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.112492,
+      "weak_label_context_agreement": 0.866667,
+      "learning_rate": 0.00015
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.063373,
+      "weak_label_context_agreement": 0.866667,
+      "learning_rate": 0.00012588
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.04174,
+      "weak_label_context_agreement": 0.866667,
+      "learning_rate": 0.0001
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.024248,
+      "weak_label_context_agreement": 0.883333,
+      "learning_rate": 7.412e-05
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.017013,
+      "weak_label_context_agreement": 0.883333,
+      "learning_rate": 5e-05
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.015174,
+      "weak_label_context_agreement": 0.883333,
+      "learning_rate": 2.929e-05
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.013241,
+      "weak_label_context_agreement": 0.883333,
+      "learning_rate": 1.34e-05
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.012474,
+      "weak_label_context_agreement": 0.883333,
+      "learning_rate": 3.41e-06
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.012101,
+      "weak_label_context_agreement": 0.883333,
+      "learning_rate": 0.0
+    }
+  ],
+  "validation": {
+    "best_epoch": 7,
+    "weak_label_context_agreement": 0.883333,
+    "confusion_matrix": [
+      [
+        27,
+        3
+      ],
+      [
+        4,
+        26
+      ]
+    ],
+    "labels": [
+      "suburban_context",
+      "urban_context"
+    ],
+    "per_class": {
+      "suburban_context": {
+        "precision": 0.870968,
+        "recall": 0.9,
+        "f1": 0.885246
+      },
+      "urban_context": {
+        "precision": 0.896552,
+        "recall": 0.866667,
+        "f1": 0.881356
+      }
+    },
+    "macro_f1_weak_label_context": 0.883301
+  },
+  "secondary_validation": {
+    "metric_scope": "heuristic secondary check only; not ground-truth infrastructure inspection accuracy",
+    "samples": 60,
+    "weak_label_infrastructure_comfort_agreement": 0.4,
+    "macro_f1_weak_label_infrastructure_comfort": 0.481263,
+    "per_class": {
+      "low_comfort_proxy": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.666667
+      },
+      "medium_comfort_proxy": {
+        "precision": 0.3,
+        "recall": 0.391304,
+        "f1": 0.339623
+      },
+      "high_comfort_proxy": {
+        "precision": 0.482759,
+        "recall": 0.4,
+        "f1": 0.4375
+      }
+    },
+    "confusion_matrix": [
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        0,
+        9,
+        14
+      ],
+      [
+        0,
+        21,
+        14
+      ]
+    ],
+    "labels": [
+      "low_comfort_proxy",
+      "medium_comfort_proxy",
+      "high_comfort_proxy"
+    ]
+  },
+  "checkpoint": {
+    "storage": "private_modal_volume",
+    "volume": "omnisight-training-checkpoints",
+    "path": "/omnisight-checkpoints/20260606T125349Z-modal-scene/classifier-head.pt",
+    "sha256": "2da0121e5f6e929237e45da72a25f4e0f7be2a11cc352af326fac557730c2e10"
+  },
+  "limitations": [
+    "Dataset setting and infrastructure labels were generated by a vision-language model and are weak labels.",
+    "This model is auxiliary evidence for street activity/environment context, not the final route safety model.",
+    "It does not count people or measure live crowd density.",
+    "It is not crime prediction, person profiling, or a safety guarantee.",
+    "This metric is not SegFormer mIoU; the demo data has no pixel-level labels.",
+    "Secondary infrastructure-comfort metrics are heuristic checks, not inspection ground truth."
+  ]
+}

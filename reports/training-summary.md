@@ -55,7 +55,9 @@ was not practical to gate and ship inside the hackathon window.
 
 ## Selected Evidence Run
 
-The selected auxiliary training run is updated after the v2 Modal rerun completes.
+**Selected:** `20260606T125349Z-modal-scene` (300 samples, 88.33% weak-label
+agreement, macro F1 0.8833 on NVIDIA B200).
+
 Prior baseline run: `20260606T121159Z-modal-scene` (60 samples, 80% weak-label
 agreement).
 
@@ -89,7 +91,7 @@ street safety, crime, or SegFormer segmentation accuracy.
 | `20260606T110435Z-modal-scene` | Balanced split, 30 epochs | best 80%, macro F1 0.80; later epochs 70% | Valid experiment; showed early overfitting |
 | `20260606T110554Z-modal-scene` | Balanced split, 8 epochs, persisted best checkpoint | best 80%, macro F1 0.80 | Prior reproducible checkpoint run |
 | `20260606T121159Z-modal-scene` | Retargeted report labels to activity/environment context, 5 epochs, 60 samples | `weak_label_context_agreement` 80%, `macro_f1_weak_label_context` 0.80 | Prior presentation evidence run |
-| v2 rerun (pending) | 300 balanced samples, ViT-224 ImageNet base, augmentation, partial unfreeze, 12 epochs | TBD | Target selected evidence run |
+| `20260606T125349Z-modal-scene` | 300 balanced samples, ViT-224 ImageNet base, augmentation, partial unfreeze, 12 epochs | `weak_label_context_agreement` 88.33%, `macro_f1_weak_label_context` 0.8833 | **Selected** presentation evidence run |
 
 ## Core Product Model
 
