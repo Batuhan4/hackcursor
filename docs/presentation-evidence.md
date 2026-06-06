@@ -365,7 +365,7 @@ Vercel). Expo physical-device results are **not** recorded here.
 | `GET /health/ready` | **PASS** `200` | `database: not_configured`, `repository: fixture (deterministic demo data)` |
 | `GET /api/v1/demo-runs` | **PASS** `200` | One fixture demo run (`demo-fixture-0001`) |
 | `POST /api/v1/routes` (lat/lng, Güngören sample) | **PASS** `200` | Two `WALK` alternatives; `generated_live: true`; `analysis_coverage: 0`; `omnisight_score: null`; attribution `Google Maps` |
-| `POST /api/v1/routes` (address strings, web UI contract) | **FAIL** `400` | `invalid route request` for both Turkish and ASCII address payloads — production API accepts lat/lng but rejects address-only JSON at decode time; likely **stale Render deploy** vs current repo (redeploy after GitHub app hookup). |
+| `POST /api/v1/routes` (address strings, web UI contract) | **FAIL** `400` | `invalid route request` for flat `origin_address` payloads before `6c4072f` deploy — see redeploy verification below. |
 
 #### Vercel web (`https://web-lake-phi-31.vercel.app`) — `agent-browser`
 
@@ -377,6 +377,18 @@ Vercel). Expo physical-device results are **not** recorded here.
 | Browser `fetch` lat/lng → Render `/api/v1/routes` | **PASS** | `200`, `generated_live: true`, 2 routes — confirms browser can reach live Render with CORS |
 | Cursor Route Assistant (UI → `POST /api/route-assistant`) | **FAIL** | Sample prompt *Neden bu rotayı önerdin?* → *Rota Asistanı şu anda kullanılamıyor* (no routes context after failed planner; verify `CURSOR_API_KEY` on Vercel if routes are fixed) |
 | Screenshots | saved | `docs/evidence-screenshots/vercel-home-20260606T123514Z.png`, `vercel-route-fail-20260606T123800Z.png`, `vercel-annotate-20260606T123800Z.png` |
+
+#### Render API redeploy verification (`2026-06-06T12:56Z` UTC)
+
+Triggered via Render API (`deploy_id: dep-d8i1hm28qa3s73dvqpj0`) from commit
+`6c4072f` after adding flat `origin_address` / `destination_address` aliases.
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Deploy status | **PASS** `live` | Service `omnisight-api` (`srv-d8i12b6rnols73b8a2tg`) |
+| `POST /api/v1/routes` flat addresses | **PASS** `200` | `{"origin_address":"Gungoren, Istanbul","destination_address":"Galata Tower, Istanbul"}` → 2 routes, `generated_live: true`, default `preference: balanced` |
+| `POST /api/v1/routes` nested addresses | **PASS** `200` | Web UI contract (`origin.address` / `destination.address`) → 2 routes |
+| `POST /api/v1/routes` lat/lng | **PASS** `200` | Güngören sample coordinates → 2 routes |
 
 #### Vercel route-assistant curl (sanity)
 
@@ -392,7 +404,7 @@ Do **not** mark complete until you run these on a physical device / dashboard:
 - [ ] **Expo network proof**: `GET /api/v1/demo-runs` or devtools/network showing Render host (not localhost).
 - [ ] **Foreground location** permission and tracking behavior on device.
 - [ ] **Local notification** delivery for configured demo offer point/radius.
-- [ ] **Render dashboard**: connect GitHub app to `Batuhan4/hackcursor` for auto-deploy on `main` (needed so address-based `/api/v1/routes` matches Vercel web).
+- [x] **Render dashboard**: GitHub-connected auto-deploy on `main`; manual API redeploy verified for address routes (`6c4072f`).
 - [ ] **Optional Postgres**: set `DATABASE_URL` on Render if moving off fixture-only persistence.
 
 ### Reference URLs (unchanged)
