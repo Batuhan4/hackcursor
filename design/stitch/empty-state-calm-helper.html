@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Yoldost - No Suggestions</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#b0c9e8",
+                        "inverse-surface": "#e5e2e3",
+                        "on-primary-container": "#777d8f",
+                        "on-error": "#690005",
+                        "inverse-primary": "#585e6f",
+                        "surface": "#131314",
+                        "tertiary-fixed-dim": "#93d3bf",
+                        "on-tertiary-fixed-variant": "#055141",
+                        "background": "#131314",
+                        "on-primary-fixed": "#151b2a",
+                        "surface-tint": "#c0c6da",
+                        "on-surface-variant": "#c6c6cc",
+                        "surface-container-low": "#1b1b1d",
+                        "on-tertiary": "#00382c",
+                        "primary-fixed": "#dce2f6",
+                        "error-container": "#93000a",
+                        "primary": "#c0c6da",
+                        "surface-container-high": "#2a2a2b",
+                        "on-tertiary-container": "#4a8977",
+                        "primary-fixed-dim": "#c0c6da",
+                        "surface-container": "#201f21",
+                        "outline": "#909096",
+                        "error": "#ffb4ab",
+                        "outline-variant": "#45474c",
+                        "surface-container-lowest": "#0e0e0f",
+                        "primary-container": "#0b1220",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed": "#d1e4ff",
+                        "surface-bright": "#39393a",
+                        "on-surface": "#e5e2e3",
+                        "on-primary-fixed-variant": "#404757",
+                        "tertiary-fixed": "#aef0da",
+                        "surface-dim": "#131314",
+                        "on-secondary-fixed": "#011d35",
+                        "on-primary": "#2a3040",
+                        "on-secondary": "#19324b",
+                        "tertiary-container": "#001610",
+                        "secondary-container": "#314863",
+                        "inverse-on-surface": "#303031",
+                        "secondary-fixed-dim": "#b0c9e8",
+                        "on-background": "#e5e2e3",
+                        "on-secondary-fixed-variant": "#314863",
+                        "surface-variant": "#353436",
+                        "tertiary": "#93d3bf",
+                        "on-tertiary-fixed": "#002019",
+                        "on-secondary-container": "#9fb7d6",
+                        "surface-container-highest": "#353436"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "24px",
+                        "gutter": "16px",
+                        "stack-md": "16px",
+                        "stack-lg": "24px",
+                        "base": "8px",
+                        "unit": "4px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "display-lg-mobile": ["28px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined[style*="'FILL' 1"] {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0b1220; 
+            background-image: radial-gradient(circle at 50% 40%, rgba(176, 201, 232, 0.05) 0%, transparent 60%);
+        }
+    </style>
+</head>
+<body class="text-on-background min-h-screen flex flex-col font-body-lg antialiased overflow-hidden">
+<header class="fixed top-0 w-full z-50 bg-surface/40 dark:bg-primary/40 backdrop-blur-xl bg-white/10 border-b border-white/10 shadow-sm flex justify-between items-center px-container-padding h-16">
+<button class="scale-95 active:scale-90 transition-transform duration-200 hover:opacity-80 flex items-center justify-center text-on-surface-variant dark:text-outline-variant">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-secondary-fixed">Yoldost</h1>
+<button class="scale-95 active:scale-90 transition-transform duration-200 hover:opacity-80 flex items-center justify-center">
+<div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant overflow-hidden border border-white/10">
+<span class="material-symbols-outlined text-sm">person</span>
+</div>
+</button>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center px-container-padding pt-16 pb-24 relative z-10 text-center">
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+<div class="w-64 h-64 bg-secondary/10 rounded-full blur-[60px]"></div>
+</div>
+<div class="relative mb-stack-lg animate-[pulse_4s_ease-in-out_infinite]">
+<img alt="Yoldost Dost mascot neutral calm expression" class="w-56 h-56 object-contain drop-shadow-[0_0_25px_rgba(176,201,232,0.15)]" src="https://lh3.googleusercontent.com/aida/AP1WRLsnFMsOfPumOah2RqLecXBC4mB-Ztg844P64En_kOySq2JZTlyH43bCVeF-CWC9Fpfp8ltbJm9zd-vyCN2Z8CEJSIAVZSvHXDq8HibYGgb690e5N1yRO949vRPWK72o-7LLYy4gMaV0Pv6-3IwMS55eB1TlJ1VNDHMa2pyIlVyiyGoqbyWeW8eleUUvzSGLwhC2jLF9bDL0febbyJcSbFRmByolnTl8Ht6P9F_0K8pbVEWCaMArW4GoiYeA"/>
+</div>
+<div class="max-w-sm flex flex-col items-center">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-stack-sm tracking-tight">No safe stops found in this area</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant/80 mb-stack-lg leading-relaxed">
+                Dost recommends staying on main, well-lit routes or adjusting your search perimeter.
+            </p>
+<button class="h-12 px-8 rounded-xl border border-outline-variant text-primary font-label-caps text-label-caps uppercase tracking-widest hover:bg-surface-variant/30 active:scale-95 transition-all duration-200 flex items-center gap-2 backdrop-blur-md bg-surface/10 shadow-[0_4px_12px_rgba(0,0,0,0.2)]">
+<span class="material-symbols-outlined text-[18px]">explore</span>
+                Expand Area
+            </button>
+</div>
+</main>
+<nav class="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] bg-surface/60 dark:bg-primary/60 rounded-t-xl backdrop-blur-2xl bg-white/20 border-t border-white/10 shadow-[0_-8px_32px_rgba(0,0,0,0.04)]">
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 dark:text-outline-variant/60 hover:text-secondary transition-colors scale-110 duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] gap-1">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-caps text-label-caps">Guide</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 dark:text-outline-variant/60 hover:text-secondary transition-colors scale-110 duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] gap-1">
+<span class="material-symbols-outlined">navigation</span>
+<span class="font-label-caps text-label-caps">Routes</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed font-bold hover:text-secondary transition-colors scale-110 duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] gap-1 relative">
+<div class="absolute -top-3 w-12 h-1 bg-secondary rounded-full opacity-50 blur-[2px]"></div>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shield_moon</span>
+<span class="font-label-caps text-label-caps">Stops</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant/60 dark:text-outline-variant/60 hover:text-secondary transition-colors scale-110 duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] gap-1">
+<span class="material-symbols-outlined">local_offer</span>
+<span class="font-label-caps text-label-caps">Vault</span>
+</button>
+</nav>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mascot = document.querySelector('img');
+            let lastY = 0;
+            
+            window.addEventListener('mousemove', (e) => {
+                if(!mascot) return;
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                mascot.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
+        });
+    </script>
+</body></html>
