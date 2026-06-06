@@ -11,11 +11,15 @@ Read `AGENTS.md` before making changes. `AGENTS.md` is the canonical project con
 
 ## Product Goal
 
-Build a working live demo for the Cursor x ALT+TAB urban AI hackathon. The product is `OmniSight`: a consumer walking-route application that compares live Google walking alternatives using authorized or openly licensed physical street indicators.
+Build a working live demo for the Cursor x ALT+TAB urban AI hackathon. The product is `YolDost` (formerly `OmniSight`): a consumer walking-route application that compares live Google walking alternatives using activity potential and authorized or openly licensed physical street indicators.
 
 The primary user is a person choosing a walking route, especially at night or in an unfamiliar neighborhood. Municipalities are potential data/integration partners, not the primary MVP customer. Revenue remains a hypothesis: ethical local sponsorships that never alter scores, premium preferences, or institutional mobility partnerships.
 
-The MVP is not a generic AI chatbot and not a presentation-only project. It is a functional route comparison demo. "Street density" means physical built-environment density derived from inanimate classes such as building, wall, road, sidewalk, sky, and vegetation. It never means person counting, live pedestrian density, demographic inference, crime risk, or guaranteed safety. UI/API wording must say "safer-route potential" or "recommended by physical environment indicators", never "guaranteed safe route".
+The single product idea is "en kalabalik/aktif, daha guvenli rota potansiyeli." The MVP may use activity signals from POI/open-business context, main-street proximity, public/open data, or authorized aggregated municipal density data. Camera-based person counting is not current MVP CV behavior and can only be discussed as a future legal/authorized aggregate-data gate.
+
+Environmental safety/comfort signals include lighting, sidewalk quality, cleanliness, greenery/green areas, physical openness, and authorized city data. Greenery is not the whole pitch, but it remains a secondary environmental comfort signal.
+
+The MVP is not a generic AI chatbot and not a presentation-only project. It is a functional route comparison demo. "Street density" means physical built-environment density derived from inanimate classes such as building, wall, road, sidewalk, sky, and vegetation. It never means unauthorized person counting, live person-level pedestrian density, demographic inference, crime risk, or guaranteed safety. UI/API wording must say "safer-route potential" or "recommended by physical environment indicators", never "guaranteed safe route".
 
 The final demo must use live network services. Next.js and Expo must call the deployed Go backend on Render; localhost is development-only and must not be required during judging.
 
@@ -66,7 +70,7 @@ For data flow:
 2. Detect faces and plates only for anonymization.
 3. Blur or mask faces and plates irreversibly.
 4. Run semantic street segmentation and inanimate urban object detection only after anonymization.
-5. Derive explainable pixel-ratio indicators for openness, built density, sidewalk share, and greenery.
+5. Derive explainable pixel-ratio indicators for openness, built density, sidewalk share, greenery, and pedestrian comfort potential.
 6. Store metric/detection metadata and anonymized evidence only.
 7. Show results through Go API and Next.js UI.
 
@@ -91,7 +95,8 @@ Never run product object detection, upload, training, or demo display on raw unb
 Privacy is a hard delivery gate:
 
 - Detect only inanimate urban objects such as signs, bins, poles, damaged roads, and municipal infrastructure.
-- Do not count people or estimate crowd/pedestrian density, even after blurring.
+- Do not count people or estimate crowd/pedestrian density from MVP camera/CV inputs, even after blurring.
+- Crowd/activity language is allowed only for POI/open-business context, main-street proximity, public/open data, or authorized aggregated municipal density data.
 - Do not ingest public municipal/MOBESE camera frames without written processing authorization.
 - Do not implement identity detection.
 - Do not implement face recognition.
@@ -116,10 +121,13 @@ Face and plate detectors are allowed only to locate regions that must be anonymi
 
 ## Commit and Delivery Rules
 
-- Use one focused commit per completed feature and push each checkpoint to GitHub.
+See `.cursor/rules/commits.mdc` for the repo-specific policy that overrides global "commit only when requested" user rules.
+
+- Use one focused commit per completed feature and push each checkpoint to GitHub without waiting for explicit commit/push requests, unless the user says to stop committing.
 - Do not combine unrelated features into one commit.
 - A single final code dump is not acceptable.
 - Commit at meaningful milestones: rules, scaffold, anonymization, detection, API, web UI, Expo UI, deploy, presentation, docs.
+- Never commit `.env`, secrets, raw images, or large weights; never force push or skip hooks unless the user asks.
 - Keep commit messages meaningful and decision-oriented.
 
 ## Live Demo and Presentation Rules
