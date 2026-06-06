@@ -4,13 +4,35 @@ Bu repo, 6 Haziran 2026 Cursor Hackathon: AI-Driven Kentsel Cozumler icin gelist
 
 ## Ana Hedef
 
-Gungoren Belediyesi atik toplama araclarindan gelen kamera/street-view benzeri goruntuler uzerinden, yalnizca kentsel objeleri tespit eden ve harita/durum paneline aktaran calisan bir demo uret.
+Gungoren Belediyesi icin yetkilendirilmis arac/kamera goruntulerini veya acik
+lisansli demo verisini kullanarak sokaklarin fiziksel yapisini analiz eden,
+aciklanabilir sokak gostergelerini harita/durum paneline aktaran calisan bir
+demo uret.
+
+Urun konumlandirmasi:
+- Urun: `OmniSight Street Intelligence`.
+- Odeme yapan ana musteri: ilce belediyelerinin Akilli Sehir, Ulasim Planlama,
+  Fen Isleri, Kentsel Tasarim ve CBS birimleri.
+- Ana problem: belediyelerin binlerce sokagi duzenli olarak personelle
+  inceleyememesi ve mudahale onceligini olculebilir veriye dayandiramamasi.
+- Ana gelir modeli: ucretli mahalle pilotu, yillik belediye SaaS lisansi,
+  islenen yol kilometresi/goruntu bazli analiz ve CBS/is emri entegrasyon
+  ucreti.
+- Vatandas rotasi ve mobil HUD, belediye urununun kamu faydasini gosteren
+  ikincil deneyimdir; MVP'nin odeme yapan musterisi vatandas degildir.
+
+`Sokak yogunlugu`, insan/yaya sayimi anlamina gelmez. Bu terim yalnizca bina,
+duvar, yol, kaldirim, gokyuzu, yesillik ve cansiz kent elemanlarindan uretilen
+fiziksel yapi yogunlugu ve yaya konforu potansiyeli icin kullanilir. Sucluluk,
+gercek guvenlik, demografi, psikolojik durum, ciro veya canli yaya yogunlugu
+iddiasi uretilmez.
 
 Oncelikli MVP:
 1. Goruntu kaynagini al.
 2. Yuz ve plakalari geri dondurulemez sekilde bulaniklastir.
-3. Tabela/kentsel obje tespiti yap.
-4. Tespitleri konum, guven skoru ve kanit gorseli ile kaydet.
+3. Kentsel semantik segmentasyon ve cansiz obje tespiti yap.
+4. Yol, kaldirim, bina, gokyuzu ve yesillik oranlarindan aciklanabilir sokak
+   gostergeleri uret; konum, model surumu ve veri kaynagi ile kaydet.
 5. Web arayuzunde harita/liste/inceleme ekrani sun.
 6. Expo uygulamasinda saha/inceleme akisinin mobil karsiligini sun.
 7. Canli demoda ayni girdiden tekrarlanabilir sonuc uret.
@@ -27,6 +49,11 @@ Oncelikli MVP:
 - Database: Render Postgres tercih edilir ve Go backend `DATABASE_URL` ile baglanir. Lokal demo icin gecici JSON/SQLite sadece offline fallback olarak kullanilabilir; final deploy'da kaynak gercegi Postgres olmalidir.
 - Harici API: Google Street View API / Google Maps API, ilk 10.000 istek kotasini koruyacak sekilde cache ve rate-limit ile kullan.
 - AI/CV: Hazir model veya servis kullanilabilir; insan kimligi, kisi profilleme, arac/kisi takibi yasaktir.
+- Ana CV tabani: Hugging Face uzerindeki semantic segmentation modeli ile yol,
+  kaldirim, bina, duvar, gokyuzu, yesillik ve cansiz kent elemanlari.
+- Demo dataset adayi: `Reubencf/streetview-global` (Mapillary kaynakli,
+  `CC-BY-SA-4.0`); attribution ve share-alike kosullari README/sunumda
+  belgelenir. Tum kareler lokal anonymization gate'inden tekrar gecirilir.
 - Model egitimi/fine-tuning compute'u: Modal kullanilabilir. Modal yalnizca lokal anonimlestirme kapisindan gecmis veriyle egitim, deney ve checkpoint uretimi icindir.
 - Final demo entegrasyonlari network uzerinden canli calismalidir: web ve Expo, Render'da yayinlanan Go API'ye baglanir. Localhost yalnizca gelistirme ve kontrollu offline fallback icindir.
 
@@ -66,6 +93,8 @@ Beklenen degisken aileleri:
 Bu proje icin KVKK uyumu teknik ozellik degil, teslim kriteridir.
 
 - Model amaci yalnizca kentsel objeler: tabela, direk, cop konteyneri, yol/cevre envanteri gibi kamusal altyapi.
+- Kisi/yaya sayimi, kalabalik yogunlugu, yas/cinsiyet tahmini veya anonim olsa
+  dahi insan davranisi analizi MVP kapsaminda degildir.
 - Kimlik tespiti, kisi profilleme, yuz tanima, plaka okuma, arac/kisi takibi kesin yasak.
 - Ham goruntuler egitim, test veya demo oncesinde yuz ve plaka anonimlestirme hattindan gecmelidir.
 - Anonimlestirme geri dondurulemez olmali; blur veya solid mask yeterli guvenlikte uygulanmali.

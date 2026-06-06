@@ -11,9 +11,11 @@ Read `AGENTS.md` before making changes. `AGENTS.md` is the canonical project con
 
 ## Product Goal
 
-Build a working live demo for the Cursor x ALT+TAB urban AI hackathon. The product must process street/city images, anonymize personal data, detect only inanimate urban objects, and show repeatable results in both the Next.js web UI and Expo mobile app.
+Build a working live demo for the Cursor x ALT+TAB urban AI hackathon. The product is `OmniSight Street Intelligence`: a municipal street-analysis platform that processes authorized or openly licensed street imagery, anonymizes personal data, measures explainable physical street indicators, and shows repeatable results in both the Next.js web UI and Expo mobile app.
 
-The MVP is not a generic AI chatbot and not a presentation-only project. The MVP is a functional urban object inventory demo.
+The paying customer is the municipality, especially Smart City, Transport Planning, Public Works, Urban Design, and GIS teams. The initial business model is a paid district pilot followed by an annual SaaS license, usage-based analysis, and GIS/work-order integration fees.
+
+The MVP is not a generic AI chatbot and not a presentation-only project. It is a functional street intelligence demo. "Street density" means physical built-environment density derived from inanimate classes such as building, wall, road, sidewalk, sky, and vegetation. It never means person counting, live pedestrian density, demographic inference, crime risk, or guaranteed safety.
 
 The final demo must use live network services. Next.js and Expo must call the deployed Go backend on Render; localhost is development-only and must not be required during judging.
 
@@ -62,9 +64,10 @@ For data flow:
 1. Read image/frame input.
 2. Detect faces and plates only for anonymization.
 3. Blur or mask faces and plates irreversibly.
-4. Run urban object detection only after anonymization.
-5. Store detection metadata and anonymized evidence only.
-6. Show results through Go API and Next.js UI.
+4. Run semantic street segmentation and inanimate urban object detection only after anonymization.
+5. Derive explainable pixel-ratio indicators for openness, built density, sidewalk share, and greenery.
+6. Store metric/detection metadata and anonymized evidence only.
+7. Show results through Go API and Next.js UI.
 
 Never run product object detection, upload, training, or demo display on raw unblurred personal data.
 
@@ -87,6 +90,7 @@ Never run product object detection, upload, training, or demo display on raw unb
 Privacy is a hard delivery gate:
 
 - Detect only inanimate urban objects such as signs, bins, poles, damaged roads, and municipal infrastructure.
+- Do not count people or estimate crowd/pedestrian density, even after blurring.
 - Do not implement identity detection.
 - Do not implement face recognition.
 - Do not implement license plate reading.
