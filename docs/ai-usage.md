@@ -49,6 +49,46 @@ the local anonymization gate**; checkpoints are promoted to a private Hugging
 Face model repo. Modal is never the product backend (Render is). Tokens come
 from `.env` (`MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET`) and are never printed.
 
+Preflight and evidence language for the live demo:
+
+```bash
+modal --version
+modal token info
+```
+
+These commands are used only to confirm CLI availability and token status; no
+secret values should be copied into logs or slides. Training evidence should
+point at `reports/training-summary.md` plus the selected run report under
+`reports/runs/`, including dataset/model revisions, fixed seed, GPU,
+hyperparameters, metrics, and checkpoint hash.
+Before any Modal image upload, run:
+
+```bash
+python3 workers/cv/preflight_manifest.py
+```
+
+The Modal training entrypoint runs the same preflight before `add_local_dir`.
+It verifies `reports/data-manifest.json` against `data/interim/anonymized`,
+requires `solid_mask`, checks recorded SHA-256 hashes, rejects raw/non-anonymized
+paths, and verifies the documented dataset/face/plate revisions where present.
+The Modal classifier is now framed as
+`street_activity_environment_context_auxiliary`: auxiliary evidence for safe
+route activity/environment context, not a final safety model. The current
+training signal is weak `urban/suburban` context only, so generated metrics are
+named `weak_label_context_agreement` and `macro_f1_weak_label_context`.
+
+Presentation-safe product signal families:
+
+- Crowd/activity proxies: POI/open-business density, main-street proximity,
+  transit/touristic activity, and authorized aggregate city data when available.
+- Environmental quality/comfort: lighting cues, sidewalk/walkability,
+  cleanliness/maintenance when available, physical openness, greenery, and
+  ordered public space.
+
+The classifier reports weak-label agreement only. It is not live person
+counting, identity/profiling, crime prediction, or a safety guarantee. The demo
+set has no pixel-level labels, so SegFormer mIoU is not claimed.
+
 ## Cursor SDK product integration
 
 `POST /api/route-assistant` is a Vercel server route using

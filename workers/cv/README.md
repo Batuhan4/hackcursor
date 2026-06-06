@@ -50,8 +50,12 @@ set -a; . ./.env; set +a
 # Run semantic street analysis and generate reports/runs/<run-id>/.
 .venv/bin/python workers/cv/analyze_streets.py --device auto
 
-# Auxiliary measurable training run on anonymized derivatives.
+# Verify the local manifest before any Modal upload.
+python3 workers/cv/preflight_manifest.py
+
+# Auxiliary measurable activity/environment context run on anonymized derivatives.
 # Uses the fastest available GPU in this order: B200, H200, H100.
+set -a; . ./.env; set +a
 modal run workers/cv/modal_train_scene.py --epochs 5 --batch-size 8
 ```
 
@@ -64,3 +68,26 @@ sidewalk, building, wall, fence, pole, traffic light/sign, vegetation, terrain,
 and sky. Person, rider, and vehicle classes are discarded before persistence.
 Its physical scores are transparent planning proxies, not people density,
 crime, guaranteed safety, or revenue predictions.
+
+`preflight_manifest.py` verifies that `reports/data-manifest.json` points only
+to images under `data/interim/anonymized`, that every listed derivative exists,
+that SHA-256 values match when recorded, and that the anonymization revisions
+and `solid_mask` method match the documented gate. Modal training refuses to
+start if this preflight fails. The demo images do not include pixel-level
+labels, so SegFormer mIoU is not claimed.
+
+The Modal classifier is labeled as
+`street_activity_environment_context_auxiliary`. It currently trains on weak
+`urban/suburban` context labels only and reports
+`weak_label_context_agreement` plus `macro_f1_weak_label_context`. These are
+presentation evidence for the two product signal families:
+
+1. crowd/activity proxies such as POI/open-business density, main-street
+   proximity, transit/touristic activity, and authorized aggregate city data
+   when available
+2. environmental quality/comfort such as lighting cues, sidewalk/walkability,
+   cleanliness/maintenance when available, physical openness, greenery, and
+   ordered public space
+
+It is not a live crowd counter, crime predictor, identity/profiling system, or
+safety guarantee.

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Train an anonymized urban/suburban context head on Modal GPU.
+"""Train an anonymized street activity/environment context head on Modal GPU.
 
 This auxiliary model provides a measurable training/evaluation artifact for the
 hackathon. Its labels come from model-generated dataset annotations, so the
 reported metric is weak-label agreement, not ground-truth street-analysis
-accuracy.
+accuracy, crowd measurement, crime prediction, or guaranteed safety.
 """
 
 from __future__ import annotations
@@ -24,6 +24,72 @@ REMOTE_DATA = Path("/omnisight-data")
 BASE_MODEL = "google/vit-base-patch16-224-in21k"
 BASE_MODEL_REVISION = "b4569560a39a0f1af58e3ddaf17facf20ab919b0"
 SEED = 42
+TASK_NAME = "street_activity_environment_context_auxiliary"
+LABELS = {"suburban": 0, "urban": 1}
+ID2LABEL = {0: "suburban_context", 1: "urban_context"}
+LABEL2ID = {value: key for key, value in ID2LABEL.items()}
+TRAINING_TARGET = {
+    "name": "street_activity_environment_context_auxiliary",
+    "presentation_label": "Weak-label street activity/environment context",
+    "label_source": "Reubencf/streetview-global setting field",
+    "label_mapping": {
+        "suburban": "lower-density street context proxy",
+        "urban": "higher-activity / main-street context proxy",
+    },
+    "safe_signal_families": [
+        {
+            "name": "crowd_activity_proxy",
+            "allowed_sources": [
+                "POI/open-business density",
+                "main-street proximity",
+                "transit/touristic activity",
+                "authorized aggregate city data when available",
+            ],
+            "current_training_signal": (
+                "weak urban/suburban context labels only; no person counting"
+            ),
+        },
+        {
+            "name": "environment_quality_comfort",
+            "allowed_sources": [
+                "lighting cues when available",
+                "sidewalk/walkability",
+                "cleanliness/maintenance when available",
+                "physical openness",
+                "greenery/ordered public space",
+            ],
+            "current_training_signal": (
+                "anonymized street imagery and documented physical-environment "
+                "analysis artifacts"
+            ),
+        },
+    ],
+    "not_claimed": [
+        "live crowd size",
+        "unauthorized camera person counting",
+        "identity or demographic profiling",
+        "crime prediction",
+        "guaranteed safety",
+        "SegFormer mIoU without pixel labels",
+    ],
+}
+
+
+def require_preflight() -> None:
+    from preflight_manifest import PreflightError, print_report, verify_manifest
+
+    try:
+        report = verify_manifest(LOCAL_MANIFEST, LOCAL_IMAGES)
+    except PreflightError as exc:
+        print("[modal-train] REFUSED: preflight failed; no Modal upload started")
+        for issue in exc.issues:
+            print(f"[modal-train] - {issue}")
+        raise SystemExit(1) from exc
+    print_report(report)
+
+
+if LOCAL_MANIFEST.exists() and LOCAL_IMAGES.exists():
+    require_preflight()
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -76,16 +142,15 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
     manifest = json.loads(
         (REMOTE_DATA / "data-manifest.json").read_text(encoding="utf-8")
     )
-    labels = {"suburban": 0, "urban": 1}
     rows = [
         record
         for record in manifest["records"]
-        if record.get("setting") in labels
+        if record.get("setting") in LABELS
     ]
 
     by_label: dict[int, list[dict]] = {0: [], 1: []}
     for row in rows:
-        by_label[labels[row["setting"]]].append(row)
+        by_label[LABELS[row["setting"]]].append(row)
     for values in by_label.values():
         random.shuffle(values)
 
@@ -120,7 +185,7 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
                 REMOTE_DATA / "images" / record["anonymized_file"]
             ).convert("RGB")
             tensor = processor(images=pil, return_tensors="pt")["pixel_values"][0]
-            return tensor, torch.tensor(labels[record["setting"]], dtype=torch.long)
+            return tensor, torch.tensor(LABELS[record["setting"]], dtype=torch.long)
 
     train_loader = DataLoader(
         StreetDataset(train_rows),
@@ -141,8 +206,8 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
         BASE_MODEL,
         revision=BASE_MODEL_REVISION,
         num_labels=2,
-        id2label={0: "suburban", 1: "urban"},
-        label2id={"suburban": 0, "urban": 1},
+        id2label=ID2LABEL,
+        label2id=LABEL2ID,
         ignore_mismatched_sizes=True,
         output_loading_info=True,
     )
@@ -208,7 +273,7 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
             {
                 "epoch": epoch + 1,
                 "train_loss": round(sum(losses) / len(losses), 6),
-                "validation_accuracy": round(accuracy, 6),
+                "weak_label_context_agreement": round(accuracy, 6),
             }
         )
 
@@ -221,7 +286,10 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
         {
             "base_model": BASE_MODEL,
             "base_model_revision": BASE_MODEL_REVISION,
-            "labels": {"suburban": 0, "urban": 1},
+            "task": TASK_NAME,
+            "labels": LABELS,
+            "id2label": ID2LABEL,
+            "training_target": TRAINING_TARGET,
             "best_epoch": best_epoch,
             "classifier_state_dict": best_classifier_state,
         },
@@ -235,7 +303,7 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
         confusion[target][prediction] += 1
 
     per_class = {}
-    for label_id, label_name in ((0, "suburban"), (1, "urban")):
+    for label_id, label_name in ((0, "suburban_context"), (1, "urban_context")):
         tp = confusion[label_id][label_id]
         fp = sum(confusion[row][label_id] for row in range(2)) - tp
         fn = sum(confusion[label_id]) - tp
@@ -255,8 +323,12 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
     return {
         "run_id": run_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "task": "urban_suburban_scene_context",
-        "metric_scope": "agreement with model-generated weak labels",
+        "task": TASK_NAME,
+        "training_target": TRAINING_TARGET,
+        "metric_scope": (
+            "weak-label agreement with urban/suburban context labels; usable as "
+            "auxiliary evidence for activity/environment context only"
+        ),
         "dataset": manifest["dataset"],
         "anonymization": manifest["anonymization"],
         "base_model": {"id": BASE_MODEL, "revision": BASE_MODEL_REVISION},
@@ -282,11 +354,11 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
         "epochs": epoch_rows,
         "validation": {
             "best_epoch": best_epoch,
-            "accuracy": round(best_accuracy, 6),
+            "weak_label_context_agreement": round(best_accuracy, 6),
             "confusion_matrix": confusion,
-            "labels": ["suburban", "urban"],
+            "labels": ["suburban_context", "urban_context"],
             "per_class": per_class,
-            "macro_f1": round(
+            "macro_f1_weak_label_context": round(
                 sum(item["f1"] for item in per_class.values()) / 2, 6
             ),
         },
@@ -298,32 +370,57 @@ def train(epochs: int = 5, batch_size: int = 8, learning_rate: float = 3e-4) -> 
         },
         "limitations": [
             "Dataset setting labels were generated by a vision-language model and are weak labels.",
-            "This metric is not SegFormer mIoU and not pedestrian-density accuracy.",
-            "The classifier is an auxiliary context model; physical street metrics remain the product core.",
+            "This model is auxiliary evidence for street activity/environment context, not the final route safety model.",
+            "It does not count people or measure live crowd density.",
+            "It is not crime prediction, person profiling, or a safety guarantee.",
+            "This metric is not SegFormer mIoU; the demo data has no pixel-level labels.",
         ],
     }
 
 
 def report_markdown(result: dict) -> str:
     validation = result["validation"]
+    target = result["training_target"]
     lines = [
         f"# Modal Training Run: {result['run_id']}",
         "",
         "## Scope",
         "",
-        "Auxiliary urban/suburban scene-context classifier trained only on locally",
-        "anonymized Hugging Face/Mapillary derivatives.",
+        "Auxiliary street activity/environment context classifier trained only on",
+        "locally anonymized Hugging Face/Mapillary derivatives.",
+        "",
+        "The current training labels are weak `urban/suburban` context labels.",
+        "They are presentation evidence for activity/environment context only, not",
+        "the final safety model.",
         "",
         f"- GPU: `{result['gpu']}`",
         f"- Base model: `{result['base_model']['id']}` @ `{result['base_model']['revision']}`",
+        f"- Training target: {target['presentation_label']}",
+        f"- Label source: {target['label_source']}",
         f"- Training samples: {result['split']['train_count']}",
         f"- Validation samples: {result['split']['validation_count']}",
         f"- Training time: {result['training_seconds']:.3f} seconds",
-        f"- Validation agreement: {validation['accuracy'] * 100:.2f}%",
-        f"- Macro F1: {validation['macro_f1']:.4f}",
+        f"- Weak-label context agreement: {validation['weak_label_context_agreement'] * 100:.2f}%",
+        f"- Macro F1 (weak-label context): {validation['macro_f1_weak_label_context']:.4f}",
         f"- Best epoch: {validation['best_epoch']}",
         f"- Checkpoint: `{result['checkpoint']['volume']}{result['checkpoint']['path']}`",
         f"- Checkpoint SHA-256: `{result['checkpoint']['sha256']}`",
+        "",
+        "## Product Signal Framing",
+        "",
+        "YolDost (formerly OmniSight/OmniOS) recommends route potential using",
+        "two safe signal families:",
+        "",
+        "1. Crowd/activity proxies: POI/open-business density, main-street",
+        "   proximity, transit/touristic activity, and authorized aggregate city",
+        "   data when available.",
+        "2. Environmental quality/comfort: lighting cues, sidewalk/walkability,",
+        "   cleanliness/maintenance when available, physical openness, greenery,",
+        "   and ordered public space.",
+        "",
+        "This run uses only the available weak urban/suburban context labels and",
+        "anonymized image derivatives. It does not use unauthorized camera person",
+        "counting or identity data.",
         "",
         "## Hyperparameters",
         "",
@@ -333,22 +430,22 @@ def report_markdown(result: dict) -> str:
         "",
         "## Epochs",
         "",
-        "| Epoch | Train loss | Validation agreement |",
+        "| Epoch | Train loss | Weak-label context agreement |",
         "|---:|---:|---:|",
     ]
     for epoch in result["epochs"]:
         lines.append(
             f"| {epoch['epoch']} | {epoch['train_loss']:.6f} | "
-            f"{epoch['validation_accuracy'] * 100:.2f}% |"
+            f"{epoch['weak_label_context_agreement'] * 100:.2f}% |"
         )
     lines.extend(
         [
             "",
             "## Interpretation",
             "",
-            "This is agreement with model-generated weak scene labels. It is not",
-            "ground-truth street-analysis accuracy, SegFormer mIoU, person-density",
-            "accuracy, crime prediction, or a safety guarantee.",
+            "This is agreement with model-generated weak context labels. It is not",
+            "ground-truth street-analysis accuracy, SegFormer mIoU, live crowd",
+            "measurement, crime prediction, or a safety guarantee.",
             "",
             "## Limitations",
             "",

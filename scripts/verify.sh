@@ -83,9 +83,13 @@ if [ -f "$ROOT/workers/cv/run_demo.py" ]; then
     python3 -m py_compile \
       "$ROOT/workers/cv/prepare_hf_demo.py" \
       "$ROOT/workers/cv/analyze_streets.py" \
+      "$ROOT/workers/cv/preflight_manifest.py" \
       "$ROOT/workers/cv/modal_train_scene.py" \
       && pass "street analysis tools compile" \
       || fail "street analysis tools compile"
+    python3 "$ROOT/workers/cv/preflight_manifest.py" --self-test \
+      && pass "modal upload preflight self-test" \
+      || fail "modal upload preflight self-test"
     # Placeholder mode is stdlib-only and deterministic: run twice, diff.
     tmp1="$(mktemp)" tmp2="$(mktemp)"
     if python3 "$ROOT/workers/cv/run_demo.py" \

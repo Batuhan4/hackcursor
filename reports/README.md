@@ -19,6 +19,7 @@ Every report must distinguish:
 - model accuracy from inference speed
 - raw model outputs from heuristic product scores
 - authorized/open-license data from simulated municipal fixtures
+- weak-label agreement from ground-truth metrics such as mIoU
 
 ## Required Fields
 
@@ -38,3 +39,18 @@ Each model run records:
 
 No report may contain API keys, token values, raw faces, readable plates, raw
 image paths, or identifying crops.
+
+Before any Modal training upload, run
+`python3 workers/cv/preflight_manifest.py`. This verifies the manifest against
+`data/interim/anonymized`, checks recorded hashes and expected anonymization
+revisions, and rejects raw or non-anonymized path references. If the preflight
+fails, no Modal training evidence should be generated.
+
+For the current auxiliary activity/environment context run, metric labels must
+remain explicit:
+
+- `weak_label_context_agreement`
+- `macro_f1_weak_label_context`
+
+These are weak-label context metrics, not mIoU, person-density accuracy, crime
+prediction, or guaranteed safety.
