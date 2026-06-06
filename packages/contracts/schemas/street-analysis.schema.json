@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Batuhan4/hackcursor/packages/contracts/schemas/street-analysis.schema.json",
+  "title": "StreetAnalysis",
+  "description": "Explainable physical street indicators derived only from allowed inanimate semantic classes.",
+  "type": "object",
+  "required": [
+    "id",
+    "demo_run_id",
+    "image_id",
+    "source_label",
+    "built_density_pct",
+    "openness_score",
+    "sidewalk_availability_score",
+    "greenery_score",
+    "road_share_pct",
+    "pedestrian_comfort_potential"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "demo_run_id": { "type": "string" },
+    "image_id": { "type": "string" },
+    "source_label": { "type": "string" },
+    "lat": { "type": ["number", "null"], "minimum": -90, "maximum": 90 },
+    "lng": { "type": ["number", "null"], "minimum": -180, "maximum": 180 },
+    "built_density_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+    "openness_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "sidewalk_availability_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "greenery_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "road_share_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+    "pedestrian_comfort_potential": { "type": "number", "minimum": 0, "maximum": 100 },
+    "model_id": { "type": ["string", "null"] }
+  },
+  "additionalProperties": false
+}

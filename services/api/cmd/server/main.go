@@ -36,7 +36,7 @@ func run() error {
 	log := logger.New(cfg.Log.Level, cfg.Log.Format)
 	slog.SetDefault(log)
 
-	log.Info("starting urban-object-inventory api",
+	log.Info("starting omnisight-street-intelligence api",
 		"host", cfg.Server.Host,
 		"port", cfg.Server.Port,
 	)
@@ -105,11 +105,12 @@ func buildDependencies(log *slog.Logger, cfg *config.Config) gateway.Dependencie
 
 	listDemoRuns := usecase.NewListDemoRunsUseCase(repo)
 	listDetections := usecase.NewListDetectionsUseCase(repo)
+	listStreetAnalyses := usecase.NewListStreetAnalysesUseCase(repo)
 
 	return gateway.Dependencies{
 		Logger:           log,
 		Config:           cfg,
 		HealthHandler:    handlers.NewHealthHandler(cfg.Database.URL != ""),
-		InventoryHandler: handlers.NewInventoryHandler(listDemoRuns, listDetections),
+		InventoryHandler: handlers.NewInventoryHandler(listDemoRuns, listDetections, listStreetAnalyses),
 	}
 }

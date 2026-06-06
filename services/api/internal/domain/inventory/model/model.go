@@ -85,6 +85,24 @@ type Detection struct {
 	ModelID     *string     `json:"model_id"`
 }
 
+// StreetAnalysis stores physical street indicators derived only from allowed
+// inanimate segmentation classes. It contains no person or vehicle metrics.
+type StreetAnalysis struct {
+	ID                         string   `json:"id"`
+	DemoRunID                  string   `json:"demo_run_id"`
+	ImageID                    string   `json:"image_id"`
+	SourceLabel                string   `json:"source_label"`
+	Lat                        *float64 `json:"lat"`
+	Lng                        *float64 `json:"lng"`
+	BuiltDensityPct            float64  `json:"built_density_pct"`
+	OpennessScore              float64  `json:"openness_score"`
+	SidewalkAvailabilityScore  float64  `json:"sidewalk_availability_score"`
+	GreeneryScore              float64  `json:"greenery_score"`
+	RoadSharePct               float64  `json:"road_share_pct"`
+	PedestrianComfortPotential float64  `json:"pedestrian_comfort_potential"`
+	ModelID                    *string  `json:"model_id"`
+}
+
 // AnonymizedRegionType enumerates what kind of region was masked.
 type AnonymizedRegionType string
 
@@ -106,12 +124,12 @@ const (
 // AnonymizationEvent is the audit record proving an image passed the
 // irreversible anonymization gate before any product detection ran.
 type AnonymizationEvent struct {
-	ID          string               `json:"id"`
-	DemoRunID   string               `json:"demo_run_id"`
-	ImageID     string               `json:"image_id"`
-	RegionType  AnonymizedRegionType `json:"region_type"`
-	RegionCount int                  `json:"region_count"`
-	Method      AnonymizationMethod  `json:"method"`
-	Irreversible bool                `json:"irreversible"` // always true; reversible masking is not a valid state
-	ProcessedAt *time.Time           `json:"processed_at"`
+	ID           string               `json:"id"`
+	DemoRunID    string               `json:"demo_run_id"`
+	ImageID      string               `json:"image_id"`
+	RegionType   AnonymizedRegionType `json:"region_type"`
+	RegionCount  int                  `json:"region_count"`
+	Method       AnonymizationMethod  `json:"method"`
+	Irreversible bool                 `json:"irreversible"` // always true; reversible masking is not a valid state
+	ProcessedAt  *time.Time           `json:"processed_at"`
 }

@@ -21,3 +21,8 @@ type DetectionRepository interface {
 	// (empty string = all runs).
 	ListDetections(ctx context.Context, demoRunID string) ([]model.Detection, error)
 }
+
+// StreetAnalysisRepository provides explainable physical street indicators.
+type StreetAnalysisRepository interface {
+	ListStreetAnalyses(ctx context.Context, demoRunID string) ([]model.StreetAnalysis, error)
+}

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Urban Object Inventory",
+  title: "OmniSight Street Intelligence",
   description:
-    "KVKK-safe urban object inventory demo — Cursor x ALT+TAB Hackathon",
+    "Explainable, KVKK-safe physical street analysis for municipal planning",
 };
 
 export default function RootLayout({

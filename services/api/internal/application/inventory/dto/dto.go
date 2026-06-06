@@ -15,3 +15,9 @@ type ListDetectionsResponse struct {
 	Data  []model.Detection `json:"data"`
 	Count int               `json:"count"`
 }
+
+// ListStreetAnalysesResponse is the payload for GET /api/v1/street-analyses.
+type ListStreetAnalysesResponse struct {
+	Data  []model.StreetAnalysis `json:"data"`
+	Count int                    `json:"count"`
+}

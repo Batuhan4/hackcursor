@@ -31,8 +31,42 @@ func newTestRouter(t *testing.T) http.Handler {
 		InventoryHandler: handlers.NewInventoryHandler(
 			usecase.NewListDemoRunsUseCase(repo),
 			usecase.NewListDetectionsUseCase(repo),
+			usecase.NewListStreetAnalysesUseCase(repo),
 		),
 	})
+}
+
+func TestListStreetAnalyses(t *testing.T) {
+	router := newTestRouter(t)
+	rec, body := get(t, router, "/api/v1/street-analyses")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	var payload struct {
+		Data []struct {
+			SourceLabel                string  `json:"source_label"`
+			BuiltDensityPct            float64 `json:"built_density_pct"`
+			PedestrianComfortPotential float64 `json:"pedestrian_comfort_potential"`
+		} `json:"data"`
+		Count int `json:"count"`
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+	if payload.Count != 6 {
+		t.Fatalf("count = %d, want 6", payload.Count)
+	}
+	for _, item := range payload.Data {
+		if item.SourceLabel == "" {
+			t.Error("source label must be explicit")
+		}
+		if item.BuiltDensityPct < 0 || item.BuiltDensityPct > 100 {
+			t.Errorf("built density out of range: %f", item.BuiltDensityPct)
+		}
+		if item.PedestrianComfortPotential < 0 || item.PedestrianComfortPotential > 100 {
+			t.Errorf("comfort potential out of range: %f", item.PedestrianComfortPotential)
+		}
+	}
 }
 
 func get(t *testing.T, router http.Handler, path string) (*httptest.ResponseRecorder, []byte) {

@@ -59,7 +59,24 @@ CREATE TABLE IF NOT EXISTS detections (
     model_id     TEXT
 );
 
+CREATE TABLE IF NOT EXISTS street_analyses (
+    id                           TEXT PRIMARY KEY,
+    demo_run_id                  TEXT NOT NULL REFERENCES demo_runs (id) ON DELETE CASCADE,
+    image_id                     TEXT NOT NULL,
+    source_label                 TEXT NOT NULL,
+    lat                          DOUBLE PRECISION CHECK (lat BETWEEN -90 AND 90),
+    lng                          DOUBLE PRECISION CHECK (lng BETWEEN -180 AND 180),
+    built_density_pct            DOUBLE PRECISION NOT NULL CHECK (built_density_pct BETWEEN 0 AND 100),
+    openness_score               DOUBLE PRECISION NOT NULL CHECK (openness_score BETWEEN 0 AND 100),
+    sidewalk_availability_score  DOUBLE PRECISION NOT NULL CHECK (sidewalk_availability_score BETWEEN 0 AND 100),
+    greenery_score               DOUBLE PRECISION NOT NULL CHECK (greenery_score BETWEEN 0 AND 100),
+    road_share_pct               DOUBLE PRECISION NOT NULL CHECK (road_share_pct BETWEEN 0 AND 100),
+    pedestrian_comfort_potential DOUBLE PRECISION NOT NULL CHECK (pedestrian_comfort_potential BETWEEN 0 AND 100),
+    model_id                     TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_detections_demo_run ON detections (demo_run_id);
 CREATE INDEX IF NOT EXISTS idx_detections_class ON detections (object_class);
 CREATE INDEX IF NOT EXISTS idx_image_sources_demo_run ON image_sources (demo_run_id);
 CREATE INDEX IF NOT EXISTS idx_anonymization_events_image ON anonymization_events (image_id);
+CREATE INDEX IF NOT EXISTS idx_street_analyses_demo_run ON street_analyses (demo_run_id);

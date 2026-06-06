@@ -3,6 +3,7 @@ import type {
   Detection,
   HealthResponse,
   ListResponse,
+  StreetAnalysis,
 } from "./contracts";
 
 /**
@@ -45,4 +46,15 @@ export function getDetections(
     ? `?demo_run_id=${encodeURIComponent(demoRunId)}`
     : "";
   return getJSON<ListResponse<Detection>>(`/api/v1/detections${query}`);
+}
+
+export function getStreetAnalyses(
+  demoRunId?: string,
+): Promise<ListResponse<StreetAnalysis> | null> {
+  const query = demoRunId
+    ? `?demo_run_id=${encodeURIComponent(demoRunId)}`
+    : "";
+  return getJSON<ListResponse<StreetAnalysis>>(
+    `/api/v1/street-analyses${query}`,
+  );
 }

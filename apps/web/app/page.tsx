@@ -5,10 +5,9 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Urban Object Inventory</h1>
+        <h1 className={styles.title}>OmniSight Street Intelligence</h1>
         <span className={styles.tagline}>
-          KVKK-safe urban asset detection · Güngören demo · Cursor x ALT+TAB
-          Hackathon
+          Explainable physical street analysis for municipal planning
         </span>
       </header>
 

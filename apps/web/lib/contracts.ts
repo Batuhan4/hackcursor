@@ -38,6 +38,22 @@ export interface Detection {
   model_id: string | null;
 }
 
+export interface StreetAnalysis {
+  id: string;
+  demo_run_id: string;
+  image_id: string;
+  source_label: string;
+  lat: number | null;
+  lng: number | null;
+  built_density_pct: number;
+  openness_score: number;
+  sidewalk_availability_score: number;
+  greenery_score: number;
+  road_share_pct: number;
+  pedestrian_comfort_potential: number;
+  model_id: string | null;
+}
+
 /** Go API list envelope: { data, count }. */
 export interface ListResponse<T> {
   data: T[];

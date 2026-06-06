@@ -50,6 +50,7 @@ func NewRouter(deps Dependencies) *chi.Mux {
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get("/demo-runs", deps.InventoryHandler.ListDemoRuns)
 		r.Get("/detections", deps.InventoryHandler.ListDetections)
+		r.Get("/street-analyses", deps.InventoryHandler.ListStreetAnalyses)
 	})
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {

@@ -27,8 +27,9 @@ type InventoryRepository struct {
 // Compile-time port checks: the skeleton must keep satisfying the domain
 // ports so the main wiring can switch implementations without changes.
 var (
-	_ repository.DemoRunRepository   = (*InventoryRepository)(nil)
-	_ repository.DetectionRepository = (*InventoryRepository)(nil)
+	_ repository.DemoRunRepository        = (*InventoryRepository)(nil)
+	_ repository.DetectionRepository      = (*InventoryRepository)(nil)
+	_ repository.StreetAnalysisRepository = (*InventoryRepository)(nil)
 )
 
 // NewInventoryRepository creates the postgres adapter skeleton.
@@ -44,4 +45,8 @@ func (r *InventoryRepository) ListDemoRuns(ctx context.Context) ([]model.DemoRun
 // ListDetections will read from the detections table.
 func (r *InventoryRepository) ListDetections(ctx context.Context, demoRunID string) ([]model.Detection, error) {
 	return nil, errors.New(errors.ErrNotImplemented, "postgres detections repository not wired yet", nil)
+}
+
+func (r *InventoryRepository) ListStreetAnalyses(ctx context.Context, demoRunID string) ([]model.StreetAnalysis, error) {
+	return nil, errors.New(errors.ErrNotImplemented, "postgres street_analyses repository not wired yet", nil)
 }

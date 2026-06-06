@@ -9,19 +9,33 @@ import (
 
 // InventoryHandler serves demo runs and detections to the dashboard.
 type InventoryHandler struct {
-	listDemoRuns   *usecase.ListDemoRunsUseCase
-	listDetections *usecase.ListDetectionsUseCase
+	listDemoRuns       *usecase.ListDemoRunsUseCase
+	listDetections     *usecase.ListDetectionsUseCase
+	listStreetAnalyses *usecase.ListStreetAnalysesUseCase
 }
 
 // NewInventoryHandler wires the inventory handler with its use cases.
 func NewInventoryHandler(
 	listDemoRuns *usecase.ListDemoRunsUseCase,
 	listDetections *usecase.ListDetectionsUseCase,
+	listStreetAnalyses *usecase.ListStreetAnalysesUseCase,
 ) *InventoryHandler {
 	return &InventoryHandler{
-		listDemoRuns:   listDemoRuns,
-		listDetections: listDetections,
+		listDemoRuns:       listDemoRuns,
+		listDetections:     listDetections,
+		listStreetAnalyses: listStreetAnalyses,
 	}
+}
+
+// ListStreetAnalyses handles GET /api/v1/street-analyses.
+func (h *InventoryHandler) ListStreetAnalyses(w http.ResponseWriter, r *http.Request) {
+	demoRunID := r.URL.Query().Get("demo_run_id")
+	resp, err := h.listStreetAnalyses.Execute(r.Context(), demoRunID)
+	if err != nil {
+		response.Error(w, err)
+		return
+	}
+	response.JSON(w, http.StatusOK, resp)
 }
 
 // ListDemoRuns handles GET /api/v1/demo-runs.

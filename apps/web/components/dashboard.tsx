@@ -7,9 +7,19 @@ import {
   getDemoRuns,
   getDetections,
   getReadiness,
+  getStreetAnalyses,
 } from "@/lib/api";
-import type { DemoRun, Detection, HealthResponse } from "@/lib/contracts";
-import { FIXTURE_DETECTIONS, FIXTURE_RUN } from "@/lib/fixture";
+import type {
+  DemoRun,
+  Detection,
+  HealthResponse,
+  StreetAnalysis,
+} from "@/lib/contracts";
+import {
+  FIXTURE_DETECTIONS,
+  FIXTURE_RUN,
+  FIXTURE_STREET_ANALYSES,
+} from "@/lib/fixture";
 
 import styles from "./dashboard.module.css";
 
@@ -23,6 +33,9 @@ export default function Dashboard() {
   const [readiness, setReadiness] = useState<HealthResponse | null>(null);
   const [run, setRun] = useState<DemoRun>(FIXTURE_RUN);
   const [detections, setDetections] = useState<Detection[]>(FIXTURE_DETECTIONS);
+  const [analyses, setAnalyses] = useState<StreetAnalysis[]>(
+    FIXTURE_STREET_ANALYSES,
+  );
   const [source, setSource] = useState<DataSource>("fixture");
 
   useEffect(() => {
@@ -40,7 +53,11 @@ export default function Dashboard() {
       setApiState("online");
       setReadiness(ready);
 
-      const [runs, dets] = await Promise.all([getDemoRuns(), getDetections()]);
+      const [runs, dets, streetAnalyses] = await Promise.all([
+        getDemoRuns(),
+        getDetections(),
+        getStreetAnalyses(),
+      ]);
       if (cancelled) return;
       if (runs && runs.count > 0) {
         setRun(runs.data[0]);
@@ -48,6 +65,9 @@ export default function Dashboard() {
       }
       if (dets) {
         setDetections(dets.data);
+      }
+      if (streetAnalyses) {
+        setAnalyses(streetAnalyses.data);
       }
     }
 
@@ -72,9 +92,134 @@ export default function Dashboard() {
       <DemoStatusPanel run={run} source={source} />
       <ApiHealthPanel apiState={apiState} readiness={readiness} />
       <KvkkPanel run={run} />
+      <StreetOverviewPanel analyses={analyses} />
+      <MunicipalCameraPanel />
       <MapListPanel points={uniquePoints} />
+      <StreetAnalysisPanel analyses={analyses} />
       <DetectionsPanel detections={detections} />
     </div>
+  );
+}
+
+function mean(analyses: StreetAnalysis[], key: keyof StreetAnalysis) {
+  if (analyses.length === 0) return 0;
+  return (
+    analyses.reduce((sum, item) => sum + Number(item[key]), 0) / analyses.length
+  );
+}
+
+function StreetOverviewPanel({ analyses }: { analyses: StreetAnalysis[] }) {
+  const metrics = [
+    ["Physical density", mean(analyses, "built_density_pct")],
+    ["Openness", mean(analyses, "openness_score")],
+    ["Sidewalk proxy", mean(analyses, "sidewalk_availability_score")],
+    ["Greenery", mean(analyses, "greenery_score")],
+    ["Comfort potential", mean(analyses, "pedestrian_comfort_potential")],
+  ] as const;
+
+  return (
+    <section
+      className={`${styles.panel} ${styles.panelWide}`}
+      aria-label="Street intelligence overview"
+    >
+      <h2 className={styles.panelTitle}>
+        Street Intelligence
+        <span className={`${styles.badge} ${styles.badgeOk}`}>
+          6 open-license samples
+        </span>
+      </h2>
+      <div className={styles.metricGrid}>
+        {metrics.map(([label, value]) => (
+          <div className={styles.metric} key={label}>
+            <span className={styles.metricLabel}>{label}</span>
+            <strong>{value.toFixed(1)}</strong>
+            <span className={styles.metricUnit}>/100 proxy</span>
+          </div>
+        ))}
+      </div>
+      <p className={styles.methodNote}>
+        SegFormer pixel ratios from road, sidewalk, building, wall, sky and
+        vegetation. No person counting, crime prediction or guaranteed safety
+        claim.
+      </p>
+    </section>
+  );
+}
+
+function MunicipalCameraPanel() {
+  return (
+    <section className={styles.panel} aria-label="Municipal camera context">
+      <h2 className={styles.panelTitle}>
+        Live Municipal Context
+        <span className={`${styles.badge} ${styles.badgeWarn}`}>view only</span>
+      </h2>
+      <p className={styles.panelText}>
+        İBB publishes traffic camera views for public observation. OmniSight
+        links to the official viewer but does not download or analyze that
+        stream without written authorization.
+      </p>
+      <a
+        className={styles.externalLink}
+        href="https://uym.ibb.gov.tr/hizmetler/trafik-olcum-ve-gozlem"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Open official İBB camera service ↗
+      </a>
+    </section>
+  );
+}
+
+function StreetAnalysisPanel({ analyses }: { analyses: StreetAnalysis[] }) {
+  const ordered = [...analyses].sort(
+    (a, b) =>
+      b.pedestrian_comfort_potential - a.pedestrian_comfort_potential,
+  );
+  return (
+    <section
+      className={`${styles.panel} ${styles.panelWide}`}
+      aria-label="Physical street analyses"
+    >
+      <h2 className={styles.panelTitle}>
+        Physical Street Analysis
+        <span className={`${styles.badge} ${styles.badgeDim}`}>
+          HF / Mapillary fixture
+        </span>
+      </h2>
+      <div className={styles.tableWrap}>
+        <table>
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>Built</th>
+              <th>Open</th>
+              <th>Sidewalk</th>
+              <th>Green</th>
+              <th>Comfort potential</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ordered.map((item) => (
+              <tr key={item.id}>
+                <td>
+                  <strong>{item.source_label}</strong>
+                  <span className={styles.sourceDetail}>{item.image_id}</span>
+                </td>
+                <td>{item.built_density_pct.toFixed(1)}%</td>
+                <td>{item.openness_score.toFixed(1)}</td>
+                <td>{item.sidewalk_availability_score.toFixed(1)}</td>
+                <td>{item.greenery_score.toFixed(1)}</td>
+                <td>
+                  <span className={styles.scoreValue}>
+                    {item.pedestrian_comfort_potential.toFixed(1)}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -211,11 +356,11 @@ function MapListPanel({ points }: { points: Detection[] }) {
       <h2 className={styles.panelTitle}>
         Map / Locations
         <span className={`${styles.badge} ${styles.badgeDim}`}>
-          placeholder
+          municipal integration pending
         </span>
       </h2>
       <div className={styles.mapBox}>
-        <span>Map view (Google Maps integration pending)</span>
+        <span>Municipal segment map integration pending</span>
         <span>
           Detected points will render here with anonymized evidence popups.
         </span>
