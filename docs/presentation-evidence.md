@@ -145,6 +145,15 @@ Physical demo placeholders:
 
 ## Hugging Face Datasets And Models
 
+Dataset comparison (June 2026):
+
+| Candidate | License | Practical for anonymized demo prep | Label richness | Decision |
+|---|---|---|---|---|
+| `Reubencf/streetview-global` | CC-BY-SA-4.0 | Yes: inline images stream locally | VLM weak: setting, weather, time, infrastructure, VQA | **Selected** |
+| `NUS-UAL/global-streetscapes` | CC-BY-SA-4.0 | No: imagery in 23 GB+ tar archives | Manual lighting/weather/quality | Deferred |
+| `candylion/mapillary-vistas-v2` | CC-BY-NC-SA-4.0 | Yes, but non-commercial license | Pixel segmentation (124 classes) | Rejected |
+| `ReinWired/Global_streetscapes_max_50_per_city` | CC-BY-SA-4.0 | Yes, but opaque numeric labels | Unclear activity/environment mapping | Rejected |
+
 Dataset evidence:
 
 - Demo dataset: `Reubencf/streetview-global`.
@@ -152,6 +161,9 @@ Dataset evidence:
 - License: `CC-BY-SA-4.0`.
 - Recorded local baseline revision:
   `a206537534dc0e8165e0e7d36f08df14795127db`.
+- v2 training corpus target: 300 balanced samples (150 urban + 150 suburban,
+  daytime, seed 42) with weak labels for `setting`, `infrastructure`,
+  `weather`, `time_of_day`, and `infrastructure_comfort_proxy`.
 - All usable imagery must pass the local anonymization gate before training,
   upload, or display.
 
@@ -160,7 +172,10 @@ Model evidence:
 - Segmentation baseline:
   `nvidia/segformer-b0-finetuned-cityscapes-1024-1024` at
   `21b3847fae21ddee674abd31129307b6a1235bd9`.
-- Auxiliary Modal classifier base:
+- Auxiliary Modal classifier base (v2):
+  `google/vit-base-patch16-224` at
+  `3f49326eb077187dfe1c2a2bb15fbd74e6ab91e3`.
+- Prior auxiliary baseline:
   `google/vit-base-patch16-224-in21k` at
   `b4569560a39a0f1af58e3ddaf17facf20ab919b0`.
 - Face-region detector for masking:
@@ -192,9 +207,9 @@ Recorded evidence:
 
 - `docs/kvkk.md` documents the operating procedure and deletion checklist.
 - `workers/cv/README.md` documents the non-negotiable pipeline order.
-- `reports/training-summary.md` records 60 locally anonymized derivatives, 1
-  face masked, 13 plates masked, and solid mask with 20% bounding-box padding
-  for the selected Modal training evidence.
+- `reports/training-summary.md` records the anonymized derivative counts, face
+  and plate mask totals, and solid mask with 20% bounding-box padding for the
+  selected Modal training evidence.
 - `reports/runs/20260606T134500Z-local-baseline/report.md` records one local
   baseline batch where raw streamed images were not written to disk, 0 faces
   and 1 plate were masked, and the method was `solid_mask`.
@@ -216,10 +231,16 @@ Modal role:
 - Modal logs/artifacts must not contain secrets, raw imagery, face/plate crops,
   plate text, or identifying metadata.
 
-Selected recorded run:
+Prior recorded run (60-sample baseline):
 
 - Run ID: `20260606T121159Z-modal-scene`.
 - Scope: auxiliary `street_activity_environment_context_auxiliary`
+  classifier.
+
+Selected recorded run (v2 — fill after rerun):
+
+- Run ID: pending v2 Modal rerun.
+- Scope: auxiliary `street_activity_environment_context_auxiliary_v2`
   classifier.
 - Report: `reports/runs/20260606T121159Z-modal-scene/report.md`.
 - Preflight: PASS (`records=60`, `files=60`, `sha256=60`,
@@ -319,31 +340,75 @@ Presentation checklist:
 
 ## Live Demo Evidence
 
-Recorded after external network smoke checks on 2026-06-06:
+### Automated verification run (`2026-06-06T12:38:31Z` UTC)
 
-- Render API base URL: `https://omnisight-api-70gd.onrender.com`
-- Render `GET /health/live` result: `200`, `{"status":"alive"}`
-- Render `GET /health/ready` result: `200`, repository `fixture (deterministic demo data)`, database `not_configured`
-- Render `GET /api/v1/demo-runs` result: `200`, one fixture demo run returned
-- Render `POST /api/v1/routes` result summary: `200`, two live Google `WALK`
-  alternatives, `generated_live: true`, `analysis_coverage: 0`,
-  `omnisight_score: null` (honest insufficient-coverage boundary)
-- Google Routes attribution visible: yes (`"attribution":"Google Maps"`)
-- Vercel web URL: `https://web-lake-phi-31.vercel.app`
-- Vercel route-submission result summary: production deploy succeeded;
-  `NEXT_PUBLIC_API_BASE_URL` and `CURSOR_API_KEY` set on Vercel project `web`
-- Expo demo mode: Expo Go / EAS build / simulator / device:
-- Expo configured API base URL:
-- Expo `GET /api/v1/demo-runs` or visual network evidence:
-- Expo foreground location permission/tracking result:
-- Expo configured demo offer point/radius:
-- Expo local notification result:
-- Expo physical phone test status:
-- Cursor SDK route-assistant result summary:
-- Modal selected evidence report:
-  `reports/runs/20260606T121159Z-modal-scene/report.md`
-- CV local baseline report:
-- Raw data deletion/anonymization checklist status:
+Agent: checklist automation (git push, curl smoke, `agent-browser` on production
+Vercel). Expo physical-device results are **not** recorded here.
+
+#### Git push
+
+| Check | Result |
+| --- | --- |
+| `git push -u origin main` | **PASS** — no force push |
+| Remote tip | `b71d0b3` — *Document live Vercel deploy and Postgres gap* |
+| Notes | Earlier session pushed 7 commits through `be8827a` (YolDost rebrand, Expo→Render proof, hackathon commit policy, env URL hardening, presentation evidence alignment). |
+
+#### Render API (`https://omnisight-api-70gd.onrender.com`)
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Pre-warm `GET /health/live` | **PASS** `200` | First cold hit ~5.7s; body `{"status":"alive"}` |
+| `GET /health/ready` | **PASS** `200` | `database: not_configured`, `repository: fixture (deterministic demo data)` |
+| `GET /api/v1/demo-runs` | **PASS** `200` | One fixture demo run (`demo-fixture-0001`) |
+| `POST /api/v1/routes` (lat/lng, Güngören sample) | **PASS** `200` | Two `WALK` alternatives; `generated_live: true`; `analysis_coverage: 0`; `omnisight_score: null`; attribution `Google Maps` |
+| `POST /api/v1/routes` (address strings, web UI contract) | **FAIL** `400` | `invalid route request` for both Turkish and ASCII address payloads — production API accepts lat/lng but rejects address-only JSON at decode time; likely **stale Render deploy** vs current repo (redeploy after GitHub app hookup). |
+
+#### Vercel web (`https://web-lake-phi-31.vercel.app`) — `agent-browser`
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| Page load | **PASS** | Title: *YolDost — Çevresel Göstergelerle Rota* |
+| Live API status pill | **PASS** | Shows *Canlı bağlantı hazır* — health poll uses `NEXT_PUBLIC_API_BASE_URL` → Render (not localhost) |
+| Route planner submit (prefilled Güngören addresses) | **FAIL** | UI: *Canlı rota servisine ulaşılamadı*; browser `fetch` to Render with address body → `400` |
+| Browser `fetch` lat/lng → Render `/api/v1/routes` | **PASS** | `200`, `generated_live: true`, 2 routes — confirms browser can reach live Render with CORS |
+| Cursor Route Assistant (UI → `POST /api/route-assistant`) | **FAIL** | Sample prompt *Neden bu rotayı önerdin?* → *Rota Asistanı şu anda kullanılamıyor* (no routes context after failed planner; verify `CURSOR_API_KEY` on Vercel if routes are fixed) |
+| Screenshots | saved | `docs/evidence-screenshots/vercel-home-20260606T123514Z.png`, `vercel-route-fail-20260606T123800Z.png`, `vercel-annotate-20260606T123800Z.png` |
+
+#### Vercel route-assistant curl (sanity)
+
+| Check | Result |
+| --- | --- |
+| `POST https://web-lake-phi-31.vercel.app/api/route-assistant` with empty `routes` | **FAIL** `400` — `invalid_request` (expected without route metrics) |
+
+### Manual evidence — **USER** (placeholders)
+
+Do **not** mark complete until you run these on a physical device / dashboard:
+
+- [ ] **Expo on phone** with `EXPO_PUBLIC_API_BASE_URL=https://omnisight-api-70gd.onrender.com` (Expo Go or EAS build).
+- [ ] **Expo network proof**: `GET /api/v1/demo-runs` or devtools/network showing Render host (not localhost).
+- [ ] **Foreground location** permission and tracking behavior on device.
+- [ ] **Local notification** delivery for configured demo offer point/radius.
+- [ ] **Render dashboard**: connect GitHub app to `Batuhan4/hackcursor` for auto-deploy on `main` (needed so address-based `/api/v1/routes` matches Vercel web).
+- [ ] **Optional Postgres**: set `DATABASE_URL` on Render if moving off fixture-only persistence.
+
+### Reference URLs (unchanged)
+
+- Render API base: `https://omnisight-api-70gd.onrender.com`
+- Vercel web: `https://web-lake-phi-31.vercel.app`
+- Modal evidence report: `reports/runs/20260606T121159Z-modal-scene/report.md`
+
+### Other evidence slots (unchanged / pending)
+
+- Expo demo mode: _pending user device test_
+- Expo configured API base URL: _pending user device test_
+- Expo `GET /api/v1/demo-runs` or visual network evidence: _pending user device test_
+- Expo foreground location permission/tracking result: _pending user device test_
+- Expo configured demo offer point/radius: _pending user device test_
+- Expo local notification result: _pending user device test_
+- Expo physical phone test status: _pending user device test_
+- CV local baseline report: _not run in this automation pass_
+- Raw data deletion/anonymization checklist status: _document separately per README/KVKK note_
+
 
 ## Slide Mapping
 
