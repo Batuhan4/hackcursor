@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  // Jury pitch deck: scripts/sync-pitch.mjs copies presentation/pitch-deck.html
+  // into public/pitch.html at prebuild; expose it at the memorable /pitch URL.
+  async rewrites() {
+    return [{ source: "/pitch", destination: "/pitch.html" }];
+  },
 };
 
 export default nextConfig;
