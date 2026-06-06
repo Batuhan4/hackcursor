@@ -65,11 +65,52 @@ func enrichRoute(
 	}
 
 	score := roundTo(averagePreferenceScore(preference, matched), 2)
+	indicators := averagePhysicalIndicators(matched)
 	route.OmniSightScore = &score
 	route.RecommendationStatus = "analyzed"
+	route.PhysicalIndicators = &indicators
 	explanation := buildExplanation(preference, coverage, score)
 	route.Explanation = &explanation
 	return route
+}
+
+func averagePhysicalIndicators(
+	analyses []inventoryModel.StreetAnalysis,
+) model.PhysicalIndicators {
+	if len(analyses) == 0 {
+		return model.PhysicalIndicators{}
+	}
+
+	var (
+		comfort        float64
+		openness       float64
+		sidewalk       float64
+		greenery       float64
+		builtDensity   float64
+		roadShare      float64
+		activeFrontage float64
+	)
+
+	for _, analysis := range analyses {
+		comfort += analysis.PedestrianComfortPotential
+		openness += analysis.OpennessScore
+		sidewalk += analysis.SidewalkAvailabilityScore
+		greenery += analysis.GreeneryScore
+		builtDensity += analysis.BuiltDensityPct
+		roadShare += analysis.RoadSharePct
+		activeFrontage += (analysis.OpennessScore + analysis.PedestrianComfortPotential) / 2
+	}
+
+	count := float64(len(analyses))
+	return model.PhysicalIndicators{
+		Comfort:        roundTo(comfort/count, 2),
+		Openness:       roundTo(openness/count, 2),
+		Sidewalk:       roundTo(sidewalk/count, 2),
+		Greenery:       roundTo(greenery/count, 2),
+		BuiltDensity:   roundTo(builtDensity/count, 2),
+		RoadShare:      roundTo(roadShare/count, 2),
+		ActiveFrontage: roundTo(activeFrontage/count, 2),
+	}
 }
 
 func nearestAnalysis(

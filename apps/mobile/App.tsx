@@ -17,6 +17,7 @@ import {
   formatDistance,
   getOfferProximity,
 } from './offerProximity';
+import RoutePlannerSection from './RoutePlannerSection';
 
 /**
  * Field shell for the YolDost mobile demo.
@@ -536,6 +537,10 @@ export default function App() {
           <Text style={styles.dim}>Health: GET /health/live</Text>
           <Text style={styles.dim}>Runs: GET /api/v1/demo-runs</Text>
         </View>
+
+        {API_BASE_URL ? (
+          <RoutePlannerSection apiBaseUrl={API_BASE_URL} />
+        ) : null}
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>

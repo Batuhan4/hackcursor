@@ -43,6 +43,11 @@ export interface RoutePoint {
   y: number;
 }
 
+export interface GeoPoint {
+  lat: number;
+  lng: number;
+}
+
 export interface RouteOption {
   id: string;
   badge: string;
@@ -55,6 +60,7 @@ export interface RouteOption {
   indicators: RouteIndicators;
   reason: string;
   path: RoutePoint[];
+  geoPath: GeoPoint[];
   analysisCoverage: number;
   omnisightScore: number | null;
   recommendationStatus: "analyzed" | "insufficient_analysis_coverage";
@@ -125,6 +131,23 @@ function normalizePaths(decoded: LatLng[][]): RoutePoint[][] {
   );
 }
 
+function mapIndicators(
+  indicators: LiveRouteOption["physical_indicators"],
+): RouteIndicators {
+  if (!indicators) {
+    return EMPTY_INDICATORS;
+  }
+  return {
+    comfort: indicators.comfort,
+    openness: indicators.openness,
+    sidewalk: indicators.sidewalk,
+    greenery: indicators.greenery,
+    builtDensity: indicators.built_density,
+    roadShare: indicators.road_share,
+    activeFrontage: indicators.active_frontage,
+  };
+}
+
 function routeReason(route: LiveRouteOption): string {
   if (route.recommendation_status === "insufficient_analysis_coverage") {
     return "Canlı Google rotası. Fiziksel analiz kapsaması yetersiz olduğu için YolDost skoru üretilmedi.";
@@ -171,9 +194,10 @@ export function routeOptionsFromResponse(
       distanceKm: route.distance_meters / 1000,
       extraMin: Math.max(0, durationMin - Math.ceil(shortestDuration / 60)),
       modeScore: route.omnisight_score ?? 0,
-      indicators: EMPTY_INDICATORS,
+      indicators: mapIndicators(route.physical_indicators),
       reason: routeReason(route),
       path: paths[index],
+      geoPath: decoded[index] ?? [],
       analysisCoverage: route.analysis_coverage,
       omnisightScore: route.omnisight_score,
       recommendationStatus: route.recommendation_status,

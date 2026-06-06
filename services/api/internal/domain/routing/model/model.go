@@ -49,17 +49,29 @@ func (c Coordinate) hasPointOrAddress() bool {
 		(c.Lat != 0 || c.Lng != 0)
 }
 
+// PhysicalIndicators averages matched street analyses along a route corridor.
+type PhysicalIndicators struct {
+	Comfort        float64 `json:"comfort"`
+	Openness       float64 `json:"openness"`
+	Sidewalk       float64 `json:"sidewalk"`
+	Greenery       float64 `json:"greenery"`
+	BuiltDensity   float64 `json:"built_density"`
+	RoadShare      float64 `json:"road_share"`
+	ActiveFrontage float64 `json:"active_frontage"`
+}
+
 // RouteOption is one Google walking alternative with optional YolDost analysis.
 type RouteOption struct {
-	ID                   string   `json:"id"`
-	DistanceMeters       int      `json:"distance_meters"`
-	DurationSeconds      int      `json:"duration_seconds"`
-	EncodedPolyline      string   `json:"encoded_polyline"`
-	GoogleRouteLabels    []string `json:"google_route_labels"`
-	AnalysisCoverage     float64  `json:"analysis_coverage"`
-	OmniSightScore       *float64 `json:"omnisight_score"`
-	RecommendationStatus string   `json:"recommendation_status"`
-	Explanation          *string  `json:"explanation"`
+	ID                   string              `json:"id"`
+	DistanceMeters       int                 `json:"distance_meters"`
+	DurationSeconds      int                 `json:"duration_seconds"`
+	EncodedPolyline      string              `json:"encoded_polyline"`
+	GoogleRouteLabels    []string            `json:"google_route_labels"`
+	AnalysisCoverage     float64             `json:"analysis_coverage"`
+	OmniSightScore       *float64            `json:"omnisight_score"`
+	RecommendationStatus string              `json:"recommendation_status"`
+	Explanation          *string             `json:"explanation"`
+	PhysicalIndicators   *PhysicalIndicators `json:"physical_indicators,omitempty"`
 }
 
 // ComputeRoutesResponse returns uncached Google alternatives.

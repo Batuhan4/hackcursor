@@ -80,6 +80,16 @@ export type RoutePreference =
   | "green"
   | "active_frontage";
 
+export interface LivePhysicalIndicators {
+  comfort: number;
+  openness: number;
+  sidewalk: number;
+  greenery: number;
+  built_density: number;
+  road_share: number;
+  active_frontage: number;
+}
+
 export interface LiveRouteOption {
   id: string;
   distance_meters: number;
@@ -90,6 +100,7 @@ export interface LiveRouteOption {
   omnisight_score: number | null;
   recommendation_status: "analyzed" | "insufficient_analysis_coverage";
   explanation: string | null;
+  physical_indicators?: LivePhysicalIndicators | null;
 }
 
 export interface ComputeRoutesResponse {

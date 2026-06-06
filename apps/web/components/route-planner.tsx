@@ -12,7 +12,7 @@ import {
 } from "@/lib/routes";
 import type { RouteMode, RouteOption } from "@/lib/routes";
 
-import DemoMap from "./demo-map";
+import GoogleRouteMap from "./google-route-map";
 import RouteAssistant from "./route-assistant";
 import styles from "./route-planner.module.css";
 
@@ -225,7 +225,7 @@ export default function RoutePlanner() {
       </form>
 
       <div className={styles.mapPane}>
-        <DemoMap
+        <GoogleRouteMap
           routes={routes}
           selectedRouteId={effectiveSelectedRouteId}
           onSelectRoute={setSelectedRouteId}
