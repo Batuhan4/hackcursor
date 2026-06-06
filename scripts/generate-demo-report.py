@@ -81,6 +81,7 @@ def main() -> int:
         lines.append("- none")
     lines.append("")
 
+    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
     print(f"[demo-report] wrote {REPORT_PATH.relative_to(ROOT)}")
     return 0

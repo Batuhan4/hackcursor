@@ -1,0 +1,12 @@
+# CV worker dependencies — needed ONLY for real imagery processing.
+# Placeholder mode (JSON fixture in, JSON out) runs on the Python stdlib alone.
+#
+# Install into a local venv (never committed):
+#   python3 -m venv .venv && .venv/bin/pip install -r workers/cv/requirements.txt
+ultralytics
+opencv-python-headless
+pillow
+numpy
+requests
+python-dotenv
+huggingface_hub

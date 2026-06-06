@@ -1,6 +1,8 @@
 {
-  "$comment": "Synthetic fixture — metadata only, contains NO imagery and NO personal data. Used by workers/cv/run_demo.py placeholder mode for repeatable demo runs.",
+  "$comment": "Synthetic fixture — metadata only, contains NO imagery and NO personal data. Single source of truth for placeholder demo runs: workers/cv/run_demo.py materializes the `placeholder` blocks deterministically, and the API fixture repository (services/api/internal/infrastructure/memory) plus the web fallback (apps/web/lib/fixture.ts) mirror the same values.",
+  "demo_run_id": "demo-fixture-0001",
   "demo_run_name": "Güngören fixture run",
+  "model_id": "shirabendor/YOLOV8-oiv7",
   "images": [
     {
       "image_id": "fixture-gungoren-001",
@@ -8,7 +10,16 @@
       "external_ref": "gungoren/merkez-mah-01",
       "lat": 41.0192,
       "lng": 28.8725,
-      "heading": 90
+      "heading": 90,
+      "placeholder": {
+        "faces": 2,
+        "plates": 1,
+        "detections": [
+          { "object_class": "traffic_sign", "confidence": 0.91, "bbox": { "x": 0.12, "y": 0.22, "width": 0.08, "height": 0.14 } },
+          { "object_class": "trash_bin", "confidence": 0.84, "bbox": { "x": 0.61, "y": 0.58, "width": 0.1, "height": 0.16 } },
+          { "object_class": "pole", "confidence": 0.78, "bbox": { "x": 0.83, "y": 0.15, "width": 0.04, "height": 0.52 } }
+        ]
+      }
     },
     {
       "image_id": "fixture-gungoren-002",
@@ -16,7 +27,15 @@
       "external_ref": "gungoren/gencosman-02",
       "lat": 41.0151,
       "lng": 28.8689,
-      "heading": 180
+      "heading": 180,
+      "placeholder": {
+        "faces": 1,
+        "plates": 0,
+        "detections": [
+          { "object_class": "billboard", "confidence": 0.88, "bbox": { "x": 0.3, "y": 0.1, "width": 0.26, "height": 0.2 } },
+          { "object_class": "traffic_light", "confidence": 0.81, "bbox": { "x": 0.71, "y": 0.18, "width": 0.05, "height": 0.12 } }
+        ]
+      }
     },
     {
       "image_id": "fixture-gungoren-003",
@@ -24,7 +43,15 @@
       "external_ref": "gungoren/tozkoparan-03",
       "lat": 41.0235,
       "lng": 28.8841,
-      "heading": 270
+      "heading": 270,
+      "placeholder": {
+        "faces": 0,
+        "plates": 1,
+        "detections": [
+          { "object_class": "bench", "confidence": 0.76, "bbox": { "x": 0.42, "y": 0.66, "width": 0.14, "height": 0.1 } },
+          { "object_class": "pothole", "confidence": 0.69, "bbox": { "x": 0.51, "y": 0.82, "width": 0.12, "height": 0.07 } }
+        ]
+      }
     }
   ]
 }

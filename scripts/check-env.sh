@@ -56,7 +56,7 @@ check_one NEXT_PUBLIC_API_BASE_URL
 
 echo ""
 echo "== Optional (deploy / local overrides) =="
-for name in VERCEL_TOKEN RENDER_API_KEY PORT CORS_ALLOWED_ORIGINS EXPO_PUBLIC_API_BASE_URL; do
+for name in VERCEL_TOKEN RENDER_API_KEY MODAL_TOKEN_ID MODAL_TOKEN_SECRET PORT CORS_ALLOWED_ORIGINS EXPO_PUBLIC_API_BASE_URL; do
   if has_var "$name"; then
     echo "PRESENT  $name"
   else
