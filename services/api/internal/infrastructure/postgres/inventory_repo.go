@@ -4,7 +4,7 @@
 //
 // Scaffold stage: methods return ErrNotImplemented so the wiring compiles and
 // the deterministic fixture repository (internal/infrastructure/memory)
-// serves demo data. Schema lives in services/api/migrations/0001_init.sql.
+// serves development/test data. Schema lives in services/api/migrations/0001_init.sql.
 //
 // TODO(postgres): implement with a pgx/v5 pool following the masterfabric-go
 // internal/shared/database/postgres.go pattern, then switch the repository

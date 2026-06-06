@@ -9,7 +9,7 @@
 - Persistence: disabled for Google route payloads
 - Attribution: returned as `Google Maps`
 - Verified behavior: three live alternatives were returned for the test route
-- Physical-analysis coverage behavior: no OmniSight score is invented when
+- Physical-analysis coverage behavior: no YolDost score is invented when
   route coverage is unavailable
 
 ## Cursor SDK

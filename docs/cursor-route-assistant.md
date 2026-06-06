@@ -20,7 +20,8 @@ mock chatbot.
 ## Privacy and Safety Boundary
 
 The endpoint accepts only a short question, route preference, and structured
-route metrics. It does not accept raw imagery, origin/destination coordinates,
+route metrics, including bounded activity/comfort proxies already returned by
+the product API. It does not accept raw imagery, origin/destination coordinates,
 location history, faces, plates, or person-level observations.
 
 Each request runs in a newly created temporary directory with Cursor sandbox
@@ -30,7 +31,8 @@ directory is deleted after the response.
 The prompt prohibits:
 
 - guaranteed-safety or crime claims
-- person counting, demographic inference, and behavior inference
+- camera-based person counting, unsupported crowd claims, demographic
+  inference, and behavior inference
 - fabricated analysis when coverage is insufficient
 - changing or generating route scores
 

@@ -47,7 +47,7 @@ oldugumuz veya canli MOBESE entegrasyonu yaptigimiz soylenmez.
 
 Sunumda kullanilacak ifade:
 
-> OmniSight, veri kaynagini degistirilebilir bir adaptor olarak tasarlar.
+> YolDost, veri kaynagini degistirilebilir bir adaptor olarak tasarlar.
 > Bugunku demo, belediye kamera entegrasyonunu anonim ve tekrar edilebilir
 > fixture ile simule eder. Yetkili kurum gercek akisi sagladiginda ayni
 > pipeline ham kareyi kalici saklamadan, modelden once yuz ve plakalari

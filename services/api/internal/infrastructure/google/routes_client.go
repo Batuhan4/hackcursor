@@ -47,7 +47,8 @@ type computeRequest struct {
 }
 
 type waypoint struct {
-	Location location `json:"location"`
+	Location *location `json:"location,omitempty"`
+	Address  string    `json:"address,omitempty"`
 }
 
 type location struct {
@@ -140,7 +141,10 @@ func (c *RoutesClient) ComputeWalkingRoutes(ctx context.Context, origin, destina
 }
 
 func point(coordinate model.Coordinate) waypoint {
-	return waypoint{Location: location{LatLng: latLng{
+	if address := strings.TrimSpace(coordinate.Address); address != "" {
+		return waypoint{Address: address}
+	}
+	return waypoint{Location: &location{LatLng: latLng{
 		Latitude: coordinate.Lat, Longitude: coordinate.Lng,
 	}}}
 }

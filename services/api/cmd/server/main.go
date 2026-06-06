@@ -38,7 +38,7 @@ func run() error {
 	log := logger.New(cfg.Log.Level, cfg.Log.Format)
 	slog.SetDefault(log)
 
-	log.Info("starting omnisight-street-intelligence api",
+	log.Info("starting yoldost-street-intelligence api",
 		"host", cfg.Server.Host,
 		"port", cfg.Server.Port,
 	)
@@ -97,9 +97,9 @@ func run() error {
 
 func buildDependencies(log *slog.Logger, cfg *config.Config) gateway.Dependencies {
 	// Scaffold stage: serve deterministic fixture data from the in-memory
-	// repository so the demo always works. internal/infrastructure/postgres
-	// holds the Render Postgres skeleton; switch here once DATABASE_URL
-	// wiring lands (migrations/0001_init.sql has the schema).
+	// repository for local development and backend tests. Readiness exposes
+	// this source explicitly; switch here once DATABASE_URL wiring lands
+	// (migrations/0001_init.sql has the schema).
 	repo := memory.NewInventoryRepository()
 	if cfg.Database.URL != "" {
 		log.Info("DATABASE_URL configured but postgres adapter is pending — serving fixture data")

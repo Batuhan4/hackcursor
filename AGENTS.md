@@ -10,15 +10,23 @@ aciklanabilir sokak gostergelerini harita/durum paneline aktaran calisan bir
 demo uret.
 
 Urun konumlandirmasi:
-- Urun: `OmniSight`.
+- Urun: `YolDost` (formerly `OmniSight`).
 - Ana kullanici: bir yerden bir yere yuruyen bireyler; ozellikle gece veya
   bilmedigi bir semtte rota secen kullanicilar, turistler, yaslilar,
   engelliler ve cocuklu aileler.
 - Ana problem: standart haritalarin rotalari sure/mesafe ile karsilastirip
-  sokagin fiziksel acikligini, kaldirimini, yesilligini ve aktif cephe
+  sokagin kalabalik/aktif potansiyelini; fiziksel acikligini, kaldirim
+  kalitesini, yesil alanini, temizlik/aydinlatma sinyallerini ve aktif cephe
   potansiyelini gostermemesi.
-- Urun vaadi: Google Routes alternatiflerini fiziksel cevre gostergeleriyle
-  yeniden siralayarak kullaniciya tercihine uygun rota potansiyeli sunmak.
+- Urun vaadi: Google Routes alternatiflerini aktivite sinyalleri ve fiziksel
+  cevre gostergeleriyle yeniden siralayarak `en kalabalik/aktif, daha guvenli
+  rota potansiyeli` sunmak.
+- `Kalabalik/aktif` canli kisi/yaya sayimi degildir; ana cadde yakinligi,
+  POI/acik isletme aktivitesi, kamusal/acik veri veya yetkili
+  toplulastirilmis belediye yogunluk verisi gibi kaynaklardan uretilen
+  aktivite potansiyelidir. Kamera tabanli kisi sayimi yalnizca gelecekte acik
+  hukuki yetki ve toplulastirilmis veri kapisiyla tartisilabilir; mevcut MVP CV
+  davranisi degildir.
 - Gelir modeli henuz dogrulanmamistir. Ilk hipotezler etik ve rotayi
   etkilemeyen yerel reklam/sponsorlu mekan, premium rota tercihleri ve kurumsal
   mobilite ortakliklaridir. Sponsor veya reklam, rota skorunu degistiremez.
@@ -27,11 +35,12 @@ Urun konumlandirmasi:
 
 `Sokak yogunlugu`, insan/yaya sayimi anlamina gelmez. Bu terim yalnizca bina,
 duvar, yol, kaldirim, gokyuzu, yesillik ve cansiz kent elemanlarindan uretilen
-fiziksel yapi yogunlugu ve yaya konforu potansiyeli icin kullanilir. Sucluluk,
-gercek guvenlik, demografi, psikolojik durum, ciro veya canli yaya yogunlugu
-iddiasi uretilmez. Arayuz ve API "kesin guvenli" veya "guvenlik garantisi"
-demez; `daha guvenli rota potansiyeli` ya da `fiziksel cevre gostergelerine
-gore onerilen rota` der.
+fiziksel yapi yogunlugu ve yaya konforu potansiyeli icin kullanilir. Yesillik
+tamamen cikarilmaz; yesil alan/yesillik ikincil bir cevresel
+guvenlik/konfor sinyalidir. Sucluluk, gercek guvenlik garantisi, demografi,
+psikolojik durum, ciro veya yetkisiz canli yaya yogunlugu iddiasi uretilmez.
+Arayuz ve API "kesin guvenli" veya "guvenlik garantisi" demez; `daha guvenli
+rota potansiyeli` ya da `fiziksel cevre gostergelerine gore onerilen rota` der.
 
 Oncelikli MVP:
 1. Goruntu kaynagini al.
@@ -102,8 +111,11 @@ Beklenen degisken aileleri:
 Bu proje icin KVKK uyumu teknik ozellik degil, teslim kriteridir.
 
 - Model amaci yalnizca kentsel objeler: tabela, direk, cop konteyneri, yol/cevre envanteri gibi kamusal altyapi.
-- Kisi/yaya sayimi, kalabalik yogunlugu, yas/cinsiyet tahmini veya anonim olsa
-  dahi insan davranisi analizi MVP kapsaminda degildir.
+- Kisi/yaya sayimi, kamera tabanli kalabalik yogunlugu, yas/cinsiyet tahmini
+  veya anonim olsa dahi insan davranisi analizi MVP kapsaminda degildir.
+  Kalabalik/aktif rota dili yalnizca POI/acik isletme, ana cadde yakinligi,
+  kamusal/acik veri veya yetkili toplulastirilmis belediye verisi sinirinda
+  kullanilir.
 - Belediye/MOBESE kamera goruntusu ancak yazili isleme yetkisi ve resmi erisim
   varsa modele girer. Halka acik izleme sayfasi veri isleme lisansi degildir.
 - Kimlik tespiti, kisi profilleme, yuz tanima, plaka okuma, arac/kisi takibi kesin yasak.
@@ -210,4 +222,5 @@ README en az sunlari icermeli:
 - Riskli veya geri donulmez islerde dur ve tek net soru sor.
 - Secret, ham veri veya KVKK riski gordugunde koruyucu varsayimla hareket et.
 - Plan gerekiyorsa once MVP teslim yolunu, sonra bonuslari yaz.
+- Anlamli milestone tamamlaninca acik commit istegi beklemeden per-feature commit ve push yap; kullanici dur diyene kadar devam et.
 - Final raporda degisen dosyalari, calistirilan testleri ve kalan riskleri belirt.

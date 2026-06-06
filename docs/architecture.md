@@ -12,7 +12,7 @@ flowchart LR
     DET -->|detection metadata +\nanonymization audit counts| API
     subgraph backend [services/api — Go on Render]
         API[REST API /api/v1] --> PG[(Render Postgres\nDATABASE_URL)]
-        API -.fallback.-> MEM[(fixture repository\ndeterministic demo data)]
+        API -.dev/test.-> MEM[(fixture repository\ndeterministic demo data)]
     end
     API --> WEB[apps/web — Next.js on Vercel\nconsumer route comparison]
     API --> MOB[apps/mobile — Expo\nfield review shell]
@@ -54,7 +54,7 @@ architecture. Layer-by-layer correspondence:
 | `internal/infrastructure/http/router` | `internal/gateway` (router) | chi + same middleware order (request id → logging → recoverer → CORS) |
 | `internal/infrastructure/http/handler/<ctx>` | `internal/gateway/handlers` | thin handlers → use cases → shared/response |
 | `internal/infrastructure/postgres/<ctx>` | `internal/infrastructure/postgres` | adapter skeleton + `migrations/0001_init.sql` |
-| — | `internal/infrastructure/memory` | deterministic fixture repository (offline demo fallback, AGENTS.md-sanctioned) |
+| — | `internal/infrastructure/memory` | deterministic fixture repository for local development and backend tests; readiness exposes this source explicitly |
 | `internal/shared/{config,logger,response,errors,middleware}` | same | ported nearly verbatim, trimmed to MVP scope |
 
 Deliberately omitted at scaffold stage (MVP scope, AGENTS.md "do not
@@ -73,5 +73,7 @@ the existing pattern: model → repository port → use case → handler → rou
 - The CV worker runs locally (laptop) during the hackathon and posts results
   toward Postgres; **Modal** may be used for training/fine-tuning compute with
   anonymized data only — it is never the product backend.
-- Demo fallback chain: live API → fixture repository in the API → fixture
-  snapshot embedded in the web app. The dashboard can never render blank.
+- Final demo UI requires a reachable live API. If the API is unavailable, the
+  web and mobile clients mark live data as unavailable instead of rendering
+  embedded mock or fixture rows. The Go fixture repository remains only for
+  local development/tests and is reported through `/health/ready`.

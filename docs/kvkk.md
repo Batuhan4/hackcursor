@@ -49,6 +49,13 @@ already passed the local anonymization gate. Raw or unverified imagery must
 never enter a Modal volume, container, log or artifact. Render remains the
 product backend.
 
+`python3 workers/cv/preflight_manifest.py` is the local upload preflight. It
+matches `reports/data-manifest.json` to `data/interim/anonymized`, requires
+`solid_mask`, verifies recorded SHA-256 hashes and expected anonymization model
+revisions, and rejects raw or non-anonymized path references. The Modal training
+script invokes this verifier before packaging local files, so failed preflight
+means no GPU upload starts.
+
 ## Google imagery terms
 
 Street View responses are used within quota (≤10k requests, cached); persisted

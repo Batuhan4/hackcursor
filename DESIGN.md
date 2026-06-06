@@ -1,8 +1,8 @@
 ---
 version: alpha
-name: OmniSight
+name: YolDost
 description: >-
-  Calm, map-first navigation design language for the OmniSight consumer
+  Calm, map-first navigation design language for the YolDost consumer
   routing experience. DRAFT v0 — palette and type choices are provisional
   and will be finalized together with the team; treat tokens as the current
   single source of truth until then.
@@ -96,7 +96,7 @@ components:
 
 ## Overview
 
-OmniSight turns image-derived physical street indicators into route choices.
+YolDost turns image-derived physical street indicators into route choices.
 The interface must read like a real navigation product — Google Maps / Apple
 Maps density — not like an operations dashboard and not like a marketing
 site. Calm, quiet, map-first: the map is the primary surface, controls and
@@ -115,10 +115,10 @@ rota" — never guaranteed safety.
 ## Colors
 
 A single restrained accent on warm-neutral surfaces. `brand` is a deep
-green: it ties the product to its strongest indicators (greenery, openness,
-comfort potential) and stays distinct from the default blue of mainstream
-map apps. Everything else is quiet: near-black green-tinted ink on off-white
-panels over a pale `surface`.
+green: it supports the comfort/safety signal set (green areas, openness,
+cleanliness, sidewalk quality and active-route potential) while staying
+distinct from the default blue of mainstream map apps. Everything else is
+quiet: near-black green-tinted ink on off-white panels over a pale `surface`.
 
 Route lines get one color each: the recommended route uses `brand`, the
 shortest route uses `route-shortest` (slate), a warm alternative uses
@@ -132,7 +132,7 @@ contrast. `ok`/`warn`/`err` are reserved for status, not decoration.
 ## Typography
 
 System stack (`system-ui`) only — no webfont cost, native feel on every
-device. `display` is reserved for the OmniSight wordmark, `title` for card
+device. `display` is reserved for the YolDost wordmark, `title` for card
 and panel headings, `body` for everything readable, `label` for chips,
 badges and field labels. Numbers that get compared (durations, distances,
 scores) use `metric` with tabular numerals so columns don't wobble.

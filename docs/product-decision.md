@@ -1,23 +1,33 @@
-# Product Decision: OmniSight Consumer Routing
+# Product Decision: YolDost Consumer Routing
 
 ## User and Problem
 
-OmniSight is for people choosing a walking route, particularly at night or in
-an unfamiliar neighborhood. Standard maps compare routes mainly by travel time
-and distance. They do not explain differences in physical openness, sidewalk
-availability, greenery, built density, or active-frontage potential.
+YolDost (formerly OmniSight) is for people choosing a walking route,
+particularly at night or in an unfamiliar neighborhood. Standard maps compare
+routes mainly by travel time and distance. They do not explain whether a route
+has stronger active/crowded street potential from main-street proximity,
+POI/open-business activity, lighting/open-city-data signals, physical openness,
+sidewalk quality, cleanliness, or green-area comfort signals.
 
 ## Product Promise
 
-OmniSight requests real walking alternatives from Google Routes API and
+YolDost requests real walking alternatives from Google Routes API and
 re-ranks them only when matching physical street-analysis coverage exists.
-Users can prefer:
+The single product idea is **"en kalabalik/aktif, daha guvenli rota
+potansiyeli"**. In the MVP, "kalabalik/aktif" means activity potential from
+POI/open-business context, main-street proximity, public/open data, and
+authorized aggregated city data. It does not mean current unauthorized CV
+person counting or live pedestrian density. Supporting safety/comfort signals
+include:
 
-- balanced
-- more open
-- sidewalk-friendly
-- greener
-- active-frontage potential
+- green areas / greenery
+- cleanliness
+- sidewalk quality and walkability
+- lighting
+- physical openness
+- main-street proximity
+- POI and open-business activity
+- authorized city data
 
 The product does not guarantee safety, predict crime, count pedestrians, or
 infer demographics. Required wording is:
@@ -25,7 +35,7 @@ infer demographics. Required wording is:
 > Fiziksel cevre gostergelerine gore daha guvenli rota potansiyeli.
 
 When physical-analysis coverage is insufficient, the API returns the Google
-alternatives without inventing an OmniSight ranking.
+alternatives without inventing a YolDost ranking.
 
 ## Data Boundaries
 
@@ -50,6 +60,14 @@ Revenue is not validated yet. Candidate models:
 
 Ads or sponsorships must never alter physical route scores or be presented as
 safety evidence.
+
+Crowd or activity language is allowed only as a product concept with a clear
+source boundary. For the MVP, "crowded/active" must mean a POI/open-business
+activity signal, main-street proximity, public/open data, or authorized
+aggregated municipal density context. It must not mean current MVP CV person
+counting, user profiling, live pedestrian density, crime prediction, or a
+safety guarantee. Camera-based person counting can only be discussed as a
+future legal/authorized aggregate-data gate.
 
 ## Cursor SDK Assistant
 
