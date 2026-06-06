@@ -1,6 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { colors, radius, shared, spacing } from '../theme';
+
+const mascot = require('../assets/mascot-dost.jpg');
 
 interface GuideScreenProps {
   apiOnline: boolean;
@@ -18,6 +20,11 @@ export default function GuideScreen({
   return (
     <View style={styles.stack}>
       <View style={shared.card}>
+        <Image
+          accessibilityLabel="Dost maskotu"
+          source={mascot}
+          style={styles.mascot}
+        />
         <Text style={styles.welcomeTitle}>Hoş geldin</Text>
         <Text style={shared.body}>
           YolDost, fiziksel çevre göstergelerine göre daha güvenli rota
@@ -98,6 +105,13 @@ export default function GuideScreen({
 const styles = StyleSheet.create({
   stack: {
     gap: spacing.md,
+  },
+  mascot: {
+    alignSelf: 'center',
+    borderRadius: radius.md,
+    height: 112,
+    marginBottom: spacing.xs,
+    width: 112,
   },
   welcomeTitle: {
     color: colors.ink,
