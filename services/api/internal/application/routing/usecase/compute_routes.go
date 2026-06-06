@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	inventoryRepo "github.com/Batuhan4/hackcursor/services/api/internal/domain/inventory/repository"
 	"github.com/Batuhan4/hackcursor/services/api/internal/domain/routing/model"
 	"github.com/Batuhan4/hackcursor/services/api/internal/domain/routing/repository"
 	domainErr "github.com/Batuhan4/hackcursor/services/api/internal/shared/errors"
@@ -13,11 +14,15 @@ import (
 // applied only when segment analysis coverage exists; zero coverage remains
 // explicit instead of manufacturing a safety score.
 type ComputeRoutesUseCase struct {
-	provider repository.WalkingRouteProvider
+	provider  repository.WalkingRouteProvider
+	analyses  inventoryRepo.StreetAnalysisRepository
 }
 
-func NewComputeRoutesUseCase(provider repository.WalkingRouteProvider) *ComputeRoutesUseCase {
-	return &ComputeRoutesUseCase{provider: provider}
+func NewComputeRoutesUseCase(
+	provider repository.WalkingRouteProvider,
+	analyses inventoryRepo.StreetAnalysisRepository,
+) *ComputeRoutesUseCase {
+	return &ComputeRoutesUseCase{provider: provider, analyses: analyses}
 }
 
 func (uc *ComputeRoutesUseCase) Execute(ctx context.Context, request model.ComputeRoutesRequest) (model.ComputeRoutesResponse, error) {
@@ -32,6 +37,12 @@ func (uc *ComputeRoutesUseCase) Execute(ctx context.Context, request model.Compu
 	if err != nil {
 		return model.ComputeRoutesResponse{}, err
 	}
+
+	analyses, err := uc.analyses.ListStreetAnalyses(ctx, "")
+	if err != nil {
+		return model.ComputeRoutesResponse{}, err
+	}
+	routes = enrichRoutes(routes, analyses, request.Preference)
 
 	return model.ComputeRoutesResponse{
 		Preference:      request.Preference,

@@ -110,6 +110,7 @@ func buildDependencies(log *slog.Logger, cfg *config.Config) gateway.Dependencie
 	listStreetAnalyses := usecase.NewListStreetAnalysesUseCase(repo)
 	computeRoutes := routingUseCase.NewComputeRoutesUseCase(
 		googleInfra.NewRoutesClient(cfg.Google.APIKey),
+		repo,
 	)
 
 	return gateway.Dependencies{

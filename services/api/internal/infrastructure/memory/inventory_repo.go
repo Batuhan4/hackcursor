@@ -64,12 +64,9 @@ func NewInventoryRepository() *InventoryRepository {
 			det("det-0007", "fixture-gungoren-003", "pothole", 0.69, model.BoundingBox{X: 0.51, Y: 0.82, Width: 0.12, Height: 0.07}, 41.0235, 28.8841),
 		},
 		analyses: []model.StreetAnalysis{
-			analysis("analysis-001", "street-001.jpg", "Guatemala City", 14.536885, -90.573723, 16.56, 76.19, 3.58, 100.00, 18.66, 56.26),
-			analysis("analysis-002", "street-002.jpg", "Austria - Vienna", 48.1875357, 16.3260175, 38.67, 15.75, 8.39, 42.62, 35.39, 23.11),
-			analysis("analysis-003", "street-003.jpg", "North America", 27.961220875019, -82.434712217994, 3.87, 44.99, 33.56, 100.00, 5.14, 57.11),
-			analysis("analysis-004", "street-004.jpg", "South America", -1.38200104, -48.411710133333, 11.07, 100.00, 3.71, 10.97, 21.65, 47.39),
-			analysis("analysis-005", "street-005.jpg", "South America", -1.3820024041667, -48.41180735, 18.47, 79.93, 15.79, 16.61, 45.71, 44.98),
-			analysis("analysis-006", "street-006.jpg", "Europe", 55.620605595081, 12.618361472102, 3.65, 58.04, 41.16, 90.62, 42.02, 62.48),
+			analysis("analysis-001", "fixture-gungoren-002", "Güngören Gençosman", 41.0151, 28.8689, 18.2, 58.0, 22.0, 55.0, 30.1, 49.0),
+			analysis("analysis-002", "fixture-gungoren-001", "Güngören Merkez", 41.0192, 28.8725, 15.4, 62.5, 17.7, 60.1, 28.1, 48.5),
+			analysis("analysis-003", "fixture-gungoren-003", "Güngören Tozkoparan", 41.0235, 28.8841, 14.1, 55.0, 20.5, 58.0, 26.4, 47.0),
 		},
 	}
 }

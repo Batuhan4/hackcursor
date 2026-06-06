@@ -38,7 +38,7 @@ func newTestRouter(t *testing.T) http.Handler {
 			usecase.NewListStreetAnalysesUseCase(repo),
 		),
 		RoutesHandler: handlers.NewRoutesHandler(
-			routingUseCase.NewComputeRoutesUseCase(fakeRouteProvider{}),
+			routingUseCase.NewComputeRoutesUseCase(fakeRouteProvider{}, repo),
 		),
 	})
 }
@@ -77,8 +77,8 @@ func TestListStreetAnalyses(t *testing.T) {
 	if err := json.Unmarshal(body, &payload); err != nil {
 		t.Fatalf("invalid JSON: %v", err)
 	}
-	if payload.Count != 6 {
-		t.Fatalf("count = %d, want 6", payload.Count)
+	if payload.Count != 3 {
+		t.Fatalf("count = %d, want 3", payload.Count)
 	}
 	for _, item := range payload.Data {
 		if item.SourceLabel == "" {
