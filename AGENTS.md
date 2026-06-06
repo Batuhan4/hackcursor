@@ -50,9 +50,7 @@ Beklenen degisken aileleri:
 - `VERCEL_TOKEN`
 - `RENDER_API_KEY`
 - `HUGGINGFACE_API_KEY` veya `HF_TOKEN`
-- `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` veya kullanilan diger AI servis anahtarlari
-- `GEMINI_API_KEY` veya kullanilan diger Google AI servis anahtarlari; opsiyoneldir, MVP icin zorunlu degildir
-- `GEMINI_MODEL`; varsayilan tercih `gemini-3.1-flash-lite`
+- `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` veya kullanilan diger AI servis anahtarlari yalnizca acik ihtiyac cikarsa eklenir; MVP odagi Hugging Face/CV ve Cursor SDK bonusudur.
 - `DATABASE_URL`
 - `NEXT_PUBLIC_API_BASE_URL`
 
