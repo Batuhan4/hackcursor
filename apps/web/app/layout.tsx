@@ -1,10 +1,14 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "OmniSight Street Intelligence",
+  title: "YolDost — Çevresel Göstergelerle Rota",
   description:
-    "Explainable, KVKK-safe physical street analysis for municipal planning",
+    "Görüntülerden türetilen fiziksel çevre göstergeleriyle daha güvenli rota potansiyeli sunan rota deneyimi. Gerçek dünya güvenliği garanti edilmez.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f3f5f2",
 };
 
 export default function RootLayout({
