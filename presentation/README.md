@@ -4,6 +4,12 @@ This folder holds the jury-facing presentation source and evidence pointers.
 Use `docs/presentation-evidence.md` as the canonical source sheet while building
 slides, exports, or speaker notes.
 
+## Deck PDF
+
+- `yoldost-deck.pdf` — jury slide deck export (copied from `research/hackcursor.pdf`).
+- Open with any PDF viewer; keep in sync with repo evidence in
+  `docs/presentation-evidence.md` when slides change.
+
 ## Evidence To Open During Demo
 
 - `docs/presentation-evidence.md` - consolidated presentation evidence,
