@@ -19,7 +19,7 @@ Oncelikli MVP:
 - Web: Next.js
 - Mobil: Expo; organizasyonun verdigi mimari sablona uy.
 - Backend: Go; kesinlikle `masterfabric-go` GitHub reposundaki mimari kullanilir. Kendi Go mimarini kurma.
-- Backend kaynak varsayimi: `https://github.com/gurkanfikretgunak/masterfabric-go`. Organizasyon farkli URL verirse once bu dosyayi guncelle.
+- Backend kaynak repo: `https://github.com/gurkanfikretgunak/masterfabric-go`.
 - AI veri seti ve model kaynagi: Hugging Face platformu kullanilir. Lokal model agirliklari sadece demo/gelistirme cache'i olabilir.
 - Hosting: Web icin Vercel. Backend icin Render.com zorunludur.
 - Database: Render Postgres tercih edilir ve Go backend `DATABASE_URL` ile baglanir. Lokal demo icin gecici JSON/SQLite sadece offline fallback olarak kullanilabilir; final deploy'da kaynak gercegi Postgres olmalidir.

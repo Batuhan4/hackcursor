@@ -23,6 +23,7 @@ Use only the hackathon-approved stack unless `AGENTS.md` is explicitly updated:
 - Mobile frontend: Expo.
 - Backend: Go.
 - Backend architecture: `masterfabric-go` architecture is mandatory.
+- Backend source repo: `https://github.com/gurkanfikretgunak/masterfabric-go`.
 - AI datasets/models: Hugging Face is mandatory.
 - External imagery/source API: Google Street View / Google Maps API.
 - Web hosting: Vercel.
